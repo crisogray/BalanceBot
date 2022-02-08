@@ -2,14 +2,12 @@
 //  ContentView.swift
 //  BalanceBot
 //
-//  Created by Ben Gray on 21/11/2021.
+//  Created by Ben Gray on 02/02/2022.
 //
 
 import SwiftUI
-import Security
 
 struct ContentView: View {
-    
     var body: some View {
         Text("Hello, world!")
             .padding()

@@ -7,23 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B5FF4799274B09CF00617686 /* BalanceBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF4798274B09CF00617686 /* BalanceBotApp.swift */; };
-		B5FF479B274B09CF00617686 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FF479A274B09CF00617686 /* ContentView.swift */; };
-		B5FF479D274B09D000617686 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5FF479C274B09D000617686 /* Assets.xcassets */; };
-		B5FF47A0274B09D000617686 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5FF479F274B09D000617686 /* Preview Assets.xcassets */; };
+		B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */; };
+		B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9427AAE806008921AC /* ContentView.swift */; };
+		B5B4AD9727AAE807008921AC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9627AAE807008921AC /* Assets.xcassets */; };
+		B5B4AD9A27AAE807008921AC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B5FF4795274B09CF00617686 /* BalanceBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		B5FF4798274B09CF00617686 /* BalanceBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceBotApp.swift; sourceTree = "<group>"; };
-		B5FF479A274B09CF00617686 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		B5FF479C274B09D000617686 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B5FF479F274B09D000617686 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		B5FF47A6274B0B0100617686 /* BalanceBot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BalanceBot.entitlements; sourceTree = "<group>"; };
+		B5B4AD8F27AAE806008921AC /* BalanceBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceBotApp.swift; sourceTree = "<group>"; };
+		B5B4AD9427AAE806008921AC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B5B4AD9627AAE807008921AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B5FF4792274B09CF00617686 /* Frameworks */ = {
+		B5B4AD8C27AAE806008921AC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,38 +32,37 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		B5FF478C274B09CF00617686 = {
+		B5B4AD8627AAE806008921AC = {
 			isa = PBXGroup;
 			children = (
-				B5FF4797274B09CF00617686 /* BalanceBot */,
-				B5FF4796274B09CF00617686 /* Products */,
+				B5B4AD9127AAE806008921AC /* BalanceBot */,
+				B5B4AD9027AAE806008921AC /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		B5FF4796274B09CF00617686 /* Products */ = {
+		B5B4AD9027AAE806008921AC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B5FF4795274B09CF00617686 /* BalanceBot.app */,
+				B5B4AD8F27AAE806008921AC /* BalanceBot.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B5FF4797274B09CF00617686 /* BalanceBot */ = {
+		B5B4AD9127AAE806008921AC /* BalanceBot */ = {
 			isa = PBXGroup;
 			children = (
-				B5FF47A6274B0B0100617686 /* BalanceBot.entitlements */,
-				B5FF4798274B09CF00617686 /* BalanceBotApp.swift */,
-				B5FF479A274B09CF00617686 /* ContentView.swift */,
-				B5FF479C274B09D000617686 /* Assets.xcassets */,
-				B5FF479E274B09D000617686 /* Preview Content */,
+				B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */,
+				B5B4AD9427AAE806008921AC /* ContentView.swift */,
+				B5B4AD9627AAE807008921AC /* Assets.xcassets */,
+				B5B4AD9827AAE807008921AC /* Preview Content */,
 			);
 			path = BalanceBot;
 			sourceTree = "<group>";
 		};
-		B5FF479E274B09D000617686 /* Preview Content */ = {
+		B5B4AD9827AAE807008921AC /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				B5FF479F274B09D000617686 /* Preview Assets.xcassets */,
+				B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -72,13 +70,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B5FF4794274B09CF00617686 /* BalanceBot */ = {
+		B5B4AD8E27AAE806008921AC /* BalanceBot */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B5FF47A3274B09D000617686 /* Build configuration list for PBXNativeTarget "BalanceBot" */;
+			buildConfigurationList = B5B4AD9D27AAE807008921AC /* Build configuration list for PBXNativeTarget "BalanceBot" */;
 			buildPhases = (
-				B5FF4791274B09CF00617686 /* Sources */,
-				B5FF4792274B09CF00617686 /* Frameworks */,
-				B5FF4793274B09CF00617686 /* Resources */,
+				B5B4AD8B27AAE806008921AC /* Sources */,
+				B5B4AD8C27AAE806008921AC /* Frameworks */,
+				B5B4AD8D27AAE806008921AC /* Resources */,
 			);
 			buildRules = (
 			);
@@ -86,25 +84,25 @@
 			);
 			name = BalanceBot;
 			productName = BalanceBot;
-			productReference = B5FF4795274B09CF00617686 /* BalanceBot.app */;
+			productReference = B5B4AD8F27AAE806008921AC /* BalanceBot.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B5FF478D274B09CF00617686 /* Project object */ = {
+		B5B4AD8727AAE806008921AC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1310;
-				LastUpgradeCheck = 1310;
+				LastSwiftUpdateCheck = 1320;
+				LastUpgradeCheck = 1320;
 				TargetAttributes = {
-					B5FF4794274B09CF00617686 = {
-						CreatedOnToolsVersion = 13.1;
+					B5B4AD8E27AAE806008921AC = {
+						CreatedOnToolsVersion = 13.2.1;
 					};
 				};
 			};
-			buildConfigurationList = B5FF4790274B09CF00617686 /* Build configuration list for PBXProject "BalanceBot" */;
+			buildConfigurationList = B5B4AD8A27AAE806008921AC /* Build configuration list for PBXProject "BalanceBot" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -112,42 +110,42 @@
 				en,
 				Base,
 			);
-			mainGroup = B5FF478C274B09CF00617686;
-			productRefGroup = B5FF4796274B09CF00617686 /* Products */;
+			mainGroup = B5B4AD8627AAE806008921AC;
+			productRefGroup = B5B4AD9027AAE806008921AC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B5FF4794274B09CF00617686 /* BalanceBot */,
+				B5B4AD8E27AAE806008921AC /* BalanceBot */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B5FF4793274B09CF00617686 /* Resources */ = {
+		B5B4AD8D27AAE806008921AC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5FF47A0274B09D000617686 /* Preview Assets.xcassets in Resources */,
-				B5FF479D274B09D000617686 /* Assets.xcassets in Resources */,
+				B5B4AD9A27AAE807008921AC /* Preview Assets.xcassets in Resources */,
+				B5B4AD9727AAE807008921AC /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B5FF4791274B09CF00617686 /* Sources */ = {
+		B5B4AD8B27AAE806008921AC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5FF479B274B09CF00617686 /* ContentView.swift in Sources */,
-				B5FF4799274B09CF00617686 /* BalanceBotApp.swift in Sources */,
+				B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */,
+				B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		B5FF47A1274B09D000617686 /* Debug */ = {
+		B5B4AD9B27AAE807008921AC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -198,7 +196,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -208,7 +206,7 @@
 			};
 			name = Debug;
 		};
-		B5FF47A2274B09D000617686 /* Release */ = {
+		B5B4AD9C27AAE807008921AC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -253,7 +251,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -263,12 +261,11 @@
 			};
 			name = Release;
 		};
-		B5FF47A4274B09D000617686 /* Debug */ = {
+		B5B4AD9E27AAE807008921AC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BalanceBot/BalanceBot.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BalanceBot/Preview Content\"";
@@ -293,12 +290,11 @@
 			};
 			name = Debug;
 		};
-		B5FF47A5274B09D000617686 /* Release */ = {
+		B5B4AD9F27AAE807008921AC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = BalanceBot/BalanceBot.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BalanceBot/Preview Content\"";
@@ -326,25 +322,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B5FF4790274B09CF00617686 /* Build configuration list for PBXProject "BalanceBot" */ = {
+		B5B4AD8A27AAE806008921AC /* Build configuration list for PBXProject "BalanceBot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B5FF47A1274B09D000617686 /* Debug */,
-				B5FF47A2274B09D000617686 /* Release */,
+				B5B4AD9B27AAE807008921AC /* Debug */,
+				B5B4AD9C27AAE807008921AC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		B5FF47A3274B09D000617686 /* Build configuration list for PBXNativeTarget "BalanceBot" */ = {
+		B5B4AD9D27AAE807008921AC /* Build configuration list for PBXNativeTarget "BalanceBot" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B5FF47A4274B09D000617686 /* Debug */,
-				B5FF47A5274B09D000617686 /* Release */,
+				B5B4AD9E27AAE807008921AC /* Debug */,
+				B5B4AD9F27AAE807008921AC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = B5FF478D274B09CF00617686 /* Project object */;
+	rootObject = B5B4AD8727AAE806008921AC /* Project object */;
 }
