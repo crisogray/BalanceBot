@@ -6,3 +6,10 @@
 //
 
 import Foundation
+
+protocol BalancesInteractor {
+}
+
+struct ActualBalancesInteractor: BalancesInteractor {
+    
+}

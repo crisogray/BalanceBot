@@ -10,18 +10,20 @@ import Combine
 
 struct ContentView: View {
     
-    @Environment(\.injected) private var injection: Injection
+    @Environment(\.injection) private var injection: Injection
     @State var userSettings: Loadable<UserSettings> = .notRequested
     
     var body: some View {
-        content.onReceive(authenticationUpdate) { userSettings = $0 }
+        content.onReceive(userSettingsUpdate) { userSettings = $0 }
     }
     
     var content: AnyView {
         switch userSettings {
         case .notRequested: return AnyView(notRequestedView)
-        case .isLoading: return AnyView(loadingView)
         case .failed: return AnyView(notAuthenticatedView)
+        case .isLoading(last: let last, cancelBag: _) where last != nil:
+            return AnyView(dashboardView(last!))
+        case .isLoading: return AnyView(loadingView)
         case .loaded(let settings): return AnyView(dashboardView(settings))
         }
     }
@@ -29,8 +31,9 @@ struct ContentView: View {
 }
 
 extension ContentView {
+    
     var notRequestedView: some View {
-        Text("").onAppear { injection.userStateInteractor.fetchUserState() }
+        Text("").onAppear { injection.userSettingsInteractor.fetchUserState() }
     }
     
     var loadingView: some View {
@@ -48,7 +51,7 @@ extension ContentView {
 }
 
 extension ContentView {
-    var authenticationUpdate: AnyPublisher<Loadable<UserSettings>, Never> {
+    var userSettingsUpdate: AnyPublisher<Loadable<UserSettings>, Never> {
         injection.appState.updates(for: \.userSettings)
     }
 }

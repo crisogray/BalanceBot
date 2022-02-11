@@ -9,17 +9,23 @@ import Foundation
 import CloudKit
 
 extension Account {
+    
+    static func new(_ id: String) -> Account {
+        Account(id: id, portfolioId: UUID().uuidString, connectedExchanges: [:], excludedBalances: [])
+    }
+    
     static func fromCKRecord(_ record: CKRecord) -> Account {
-        Account(id: record.recordID.recordName,
+        let connectedExchangesData = record["connected_exchanges"] as! String
+        return Account(id: record.recordID.recordName,
                 portfolioId: record["portfolio_id"] as! String,
-                connectedExchanges: record["connected_exchanges"] as! [String],
+                connectedExchanges: connectedExchangesData.jsonDecode(type: [String : [String : String]].self),
                 excludedBalances: record["excluded_balances"] as! [String])
     }
     
     var ckRecord: CKRecord {
         let record = CKRecord(recordType: "Account", recordID: id.ckRecordId)
         record["portfolio_id"] = portfolioId
-        record["connected_exchanges"] = connectedExchanges
+        record["connected_exchanges"] = connectedExchanges.jsonString
         record["excluded_balances"] = excludedBalances
         return record
     }
@@ -27,18 +33,22 @@ extension Account {
 }
 
 extension Portfolio {
+    
+    static func new(_ id: String) -> Portfolio {
+        Portfolio(id: id, strategy: "", targetAllocation: [:], balances: [:], isLive: 0)
+    }
+    
     static func fromCKRecord(_ record: CKRecord) -> Portfolio {
         let targetAllocationData = record["target_allocation"] as! String
         let balancesData = record["balances"] as! String
-        return Portfolio(id: record.recordID.recordName,
-                         strategy: record["strategy"] as! String,
+        return Portfolio(id: record.recordID.recordName, strategy: record["strategy"] as! String,
                          targetAllocation: targetAllocationData.jsonDecode(type: [String : Float].self),
                          balances: balancesData.jsonDecode(type: [String : Float].self),
                          isLive: record["is_live"] as! Int)
     }
     
     var ckRecord: CKRecord {
-        let record = CKRecord(recordType: "Account", recordID: id.ckRecordId)
+        let record = CKRecord(recordType: "Portfolio", recordID: id.ckRecordId)
         record["strategy"] = strategy
         record["target_allocation"] = targetAllocation.jsonString
         record["balances"] = balances.jsonString
@@ -50,8 +60,11 @@ extension Portfolio {
 
 extension Encodable {
     var jsonString: String {
-        let encoder = JSONEncoder()
-        return String(data: try! encoder.encode(self), encoding: .utf8)!
+        return String(data: jsonData, encoding: .utf8)!
+    }
+    
+    var jsonData: Data {
+        return try! JSONEncoder().encode(self)
     }
 }
 

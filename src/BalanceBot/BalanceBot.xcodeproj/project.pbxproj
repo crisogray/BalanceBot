@@ -7,18 +7,50 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B55E857327B2C9B1006D24C8 /* APIKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E857227B2C9B1006D24C8 /* APIKeyView.swift */; };
+		B55E857527B4032A006D24C8 /* APIKeyEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E857427B4032A006D24C8 /* APIKeyEntryView.swift */; };
+		B55E857827B40CCB006D24C8 /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = B55E857727B40CCB006D24C8 /* CodeScanner */; };
+		B563E43827AD5ABF00E7CA83 /* CloudKitHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E43727AD5ABF00E7CA83 /* CloudKitHelpers.swift */; };
+		B563E43E27AEC31C00E7CA83 /* Loadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E43B27AEC31C00E7CA83 /* Loadable.swift */; };
+		B563E43F27AEC31C00E7CA83 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E43C27AEC31C00E7CA83 /* Store.swift */; };
+		B563E44027AEC31C00E7CA83 /* CancelBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E43D27AEC31C00E7CA83 /* CancelBag.swift */; };
+		B563E44427AF242E00E7CA83 /* Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E44327AF242E00E7CA83 /* Injection.swift */; };
+		B563E44627AFFBCF00E7CA83 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E44527AFFBCF00E7CA83 /* DashboardView.swift */; };
 		B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */; };
 		B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9427AAE806008921AC /* ContentView.swift */; };
 		B5B4AD9727AAE807008921AC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9627AAE807008921AC /* Assets.xcassets */; };
 		B5B4AD9A27AAE807008921AC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */; };
+		B5B4ADA527ABEC56008921AC /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADA427ABEC56008921AC /* Models.swift */; };
+		B5B4ADA727AC09F9008921AC /* CloudKitRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */; };
+		B5B4ADA927AC0A02008921AC /* KeychainRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */; };
+		B5B4ADAD27AC0BF0008921AC /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */; };
+		B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADAE27AC0DEF008921AC /* AppState.swift */; };
+		B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADB027AC0F53008921AC /* UserSettingsInteractor.swift */; };
+		B5DDC4BC27AD47B300777389 /* BalancesInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DDC4BB27AD47B300777389 /* BalancesInteractor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B55E857227B2C9B1006D24C8 /* APIKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyView.swift; sourceTree = "<group>"; };
+		B55E857427B4032A006D24C8 /* APIKeyEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKeyEntryView.swift; sourceTree = "<group>"; };
+		B563E43727AD5ABF00E7CA83 /* CloudKitHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitHelpers.swift; sourceTree = "<group>"; };
+		B563E43B27AEC31C00E7CA83 /* Loadable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Loadable.swift; sourceTree = "<group>"; };
+		B563E43C27AEC31C00E7CA83 /* Store.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
+		B563E43D27AEC31C00E7CA83 /* CancelBag.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CancelBag.swift; sourceTree = "<group>"; };
+		B563E44327AF242E00E7CA83 /* Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Injection.swift; sourceTree = "<group>"; };
+		B563E44527AFFBCF00E7CA83 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		B5B4AD8F27AAE806008921AC /* BalanceBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceBotApp.swift; sourceTree = "<group>"; };
 		B5B4AD9427AAE806008921AC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B5B4AD9627AAE807008921AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B5B4ADA427ABEC56008921AC /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitRepository.swift; sourceTree = "<group>"; };
+		B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainRepository.swift; sourceTree = "<group>"; };
+		B5B4ADAA27AC0BEC008921AC /* BalanceBot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BalanceBot.entitlements; sourceTree = "<group>"; };
+		B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		B5B4ADAE27AC0DEF008921AC /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		B5B4ADB027AC0F53008921AC /* UserSettingsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsInteractor.swift; sourceTree = "<group>"; };
+		B5DDC4BB27AD47B300777389 /* BalancesInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalancesInteractor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -26,17 +58,50 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B55E857827B40CCB006D24C8 /* CodeScanner in Frameworks */,
+				B5B4ADAD27AC0BF0008921AC /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B55E857127B2C61E006D24C8 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B5B4AD9427AAE806008921AC /* ContentView.swift */,
+				B563E44527AFFBCF00E7CA83 /* DashboardView.swift */,
+				B55E857227B2C9B1006D24C8 /* APIKeyView.swift */,
+				B55E857427B4032A006D24C8 /* APIKeyEntryView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B563E44127AEC32300E7CA83 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				B563E43727AD5ABF00E7CA83 /* CloudKitHelpers.swift */,
+				B563E44227AEDE8200E7CA83 /* Clean Architecture */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		B563E44227AEDE8200E7CA83 /* Clean Architecture */ = {
+			isa = PBXGroup;
+			children = (
+				B563E43D27AEC31C00E7CA83 /* CancelBag.swift */,
+				B563E43B27AEC31C00E7CA83 /* Loadable.swift */,
+				B563E43C27AEC31C00E7CA83 /* Store.swift */,
+			);
+			path = "Clean Architecture";
+			sourceTree = "<group>";
+		};
 		B5B4AD8627AAE806008921AC = {
 			isa = PBXGroup;
 			children = (
 				B5B4AD9127AAE806008921AC /* BalanceBot */,
 				B5B4AD9027AAE806008921AC /* Products */,
+				B5B4ADAB27AC0BF0008921AC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -51,8 +116,15 @@
 		B5B4AD9127AAE806008921AC /* BalanceBot */ = {
 			isa = PBXGroup;
 			children = (
+				B5B4ADAA27AC0BEC008921AC /* BalanceBot.entitlements */,
 				B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */,
-				B5B4AD9427AAE806008921AC /* ContentView.swift */,
+				B5B4ADA427ABEC56008921AC /* Models.swift */,
+				B5B4ADAE27AC0DEF008921AC /* AppState.swift */,
+				B563E44327AF242E00E7CA83 /* Injection.swift */,
+				B563E44127AEC32300E7CA83 /* Helpers */,
+				B5B4ADB227AC0F5E008921AC /* Repositories */,
+				B5DDC4BA27AD425500777389 /* Interactors */,
+				B55E857127B2C61E006D24C8 /* Views */,
 				B5B4AD9627AAE807008921AC /* Assets.xcassets */,
 				B5B4AD9827AAE807008921AC /* Preview Content */,
 			);
@@ -65,6 +137,32 @@
 				B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		B5B4ADAB27AC0BF0008921AC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B5B4ADB227AC0F5E008921AC /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */,
+				B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		B5DDC4BA27AD425500777389 /* Interactors */ = {
+			isa = PBXGroup;
+			children = (
+				B5B4ADB027AC0F53008921AC /* UserSettingsInteractor.swift */,
+				B5DDC4BB27AD47B300777389 /* BalancesInteractor.swift */,
+			);
+			path = Interactors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -83,6 +181,9 @@
 			dependencies = (
 			);
 			name = BalanceBot;
+			packageProductDependencies = (
+				B55E857727B40CCB006D24C8 /* CodeScanner */,
+			);
 			productName = BalanceBot;
 			productReference = B5B4AD8F27AAE806008921AC /* BalanceBot.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +212,9 @@
 				Base,
 			);
 			mainGroup = B5B4AD8627AAE806008921AC;
+			packageReferences = (
+				B55E857627B40CCB006D24C8 /* XCRemoteSwiftPackageReference "CodeScanner" */,
+			);
 			productRefGroup = B5B4AD9027AAE806008921AC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -137,8 +241,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B55E857527B4032A006D24C8 /* APIKeyEntryView.swift in Sources */,
+				B5B4ADA927AC0A02008921AC /* KeychainRepository.swift in Sources */,
 				B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */,
 				B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */,
+				B563E43F27AEC31C00E7CA83 /* Store.swift in Sources */,
+				B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */,
+				B5B4ADA727AC09F9008921AC /* CloudKitRepository.swift in Sources */,
+				B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */,
+				B563E44627AFFBCF00E7CA83 /* DashboardView.swift in Sources */,
+				B563E44427AF242E00E7CA83 /* Injection.swift in Sources */,
+				B55E857327B2C9B1006D24C8 /* APIKeyView.swift in Sources */,
+				B563E44027AEC31C00E7CA83 /* CancelBag.swift in Sources */,
+				B563E43827AD5ABF00E7CA83 /* CloudKitHelpers.swift in Sources */,
+				B5B4ADA527ABEC56008921AC /* Models.swift in Sources */,
+				B563E43E27AEC31C00E7CA83 /* Loadable.swift in Sources */,
+				B5DDC4BC27AD47B300777389 /* BalancesInteractor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,12 +384,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BalanceBot/BalanceBot.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BalanceBot/Preview Content\"";
 				DEVELOPMENT_TEAM = VEC99QV99S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Allow access to camera to scan QR code.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -295,12 +417,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BalanceBot/BalanceBot.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"BalanceBot/Preview Content\"";
 				DEVELOPMENT_TEAM = VEC99QV99S;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Allow access to camera to scan QR code.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -341,6 +467,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B55E857627B40CCB006D24C8 /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B55E857727B40CCB006D24C8 /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B55E857627B40CCB006D24C8 /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B5B4AD8727AAE806008921AC /* Project object */;
 }

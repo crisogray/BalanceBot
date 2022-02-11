@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import CloudKit
 
 @main
 struct BalanceBotApp: App {
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .tint(Color(red: 244 / 255, green: 184 / 255, blue: 39 / 255))
+                .environment(\.injection, Injection.defaultValue)
+                .preferredColorScheme(.dark)
         }
     }
 }

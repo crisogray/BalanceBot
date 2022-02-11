@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-typealias LoadableSubject<Value> = Binding<Loadable<Value>>
+// typealias LoadableSubject<Value> = Binding<Loadable<Value>>
 
 enum Loadable<T> {
 
@@ -25,6 +25,14 @@ enum Loadable<T> {
         default: return nil
         }
     }
+    
+    var loadedValue: T {
+        if let value = value {
+            return value
+        }
+        fatalError("loadedValue called from view where UserSettings are not loaded")
+    }
+    
     var error: Error? {
         switch self {
         case let .failed(error): return error
