@@ -28,8 +28,7 @@ struct ActualKeychainRepository: KeychainRepository {
     }
     
     func query(for key: String) -> [String : Any] {
-        [kSecClass as String : kSecClassInternetPassword,
-         kSecAttrAccount as String : key]
+        [kSecClass as String : kSecClassInternetPassword, kSecAttrAccount as String : key]
     }
     
     func itemExists(for key: String) -> Bool {

@@ -20,13 +20,9 @@ protocol CloudKitRepository {
 
 struct ActualCloudKitRepository: CloudKitRepository {
     
-    let container: CKContainer
+    let container: CKContainer = .default()
     
     var cancellables = Set<AnyCancellable>()
-    
-    init(container: CKContainer) {
-        self.container = container
-    }
     
     func fetchCurrentUserID() -> AnyPublisher<CKRecord.ID, Error> {
         return resultErrorCallbackPublisher { completion in

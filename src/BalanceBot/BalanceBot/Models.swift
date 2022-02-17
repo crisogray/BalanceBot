@@ -30,60 +30,44 @@ struct UserSettings: Codable, Equatable {
     
 }
 
-struct Balance: Codable, Equatable {
+struct Balance: Equatable {
     var ticker: String
-    var value: Float
-    var usdValue: Float
-    var exchange: String
+    var balance: Double
+    var price: Double
+    var usdValue: Double
+    var exchange: Exchange
+    
+    init(_ exchangeBalance: ExchangeBalance, price: Double = 1) {
+        ticker = exchangeBalance.exchange.renames[exchangeBalance.ticker] ?? exchangeBalance.ticker
+        balance = exchangeBalance.balance
+        self.price = price
+        usdValue = exchangeBalance.balance * price
+        exchange = exchangeBalance.exchange
+    }
+    
 }
 
-extension Balance {
-    struct ExchangeBalance: Codable, Equatable {
-        var ticker: String
-        var value: Float
-        var exchange: String
-    }
+protocol ArrayInitialisable {
+    init(values: [Any]) throws
 }
 
-extension Balance.ExchangeBalance {
-    func convertToUSD(prices: [String : Float]) -> Balance {
-        let rate = prices[ticker] ?? 0
-        return Balance(ticker: ticker, value: value, usdValue: value * rate, exchange: exchange)
-    }
-}
-
-enum Exchange: String, Hashable, Codable, CaseIterable {
-    
-    static var sortedAllCases: [Exchange] {
-        allCases.sorted { $0.rawValue < $1.rawValue }
-    }
-    
-    case bitfinex = "Bitfinex", binance = "Binance", ftx = "FTX", kraken = "Kraken", coinbase = "Coinbase"
-    
-    var regexPattern: String {
-        switch self {
-        case .bitfinex: return "-key:(\\w+)-secret:(\\w+)\\Z"
-        default: return ""
-        }
-    }
-    
-    func parseAPIKeyQRString(_ qr: String) -> Result<(String, String), Error> {
-        do {
-            let regex = try NSRegularExpression(pattern: regexPattern, options: [])
-            guard let match = regex.firstMatch(in: qr, options: [], range: NSRange(location: 0, length: qr.count)),
-                  let keyRange = Range(match.range(at: 1), in: qr),
-                  let secretRange = Range(match.range(at: 2), in: qr) else {
-                      throw RegexError.regexFailed
+extension Array where Element == Balance.ExchangeBalance {
+    func convertToBalances(_ prices: [Balance.Price]) -> [Balance] {
+        return compactMap { exchangeBalance in
+            if exchangeBalance.ticker == "USD" {
+                return Balance(exchangeBalance)
+            } else if let price = prices.first(where: { price in
+                price.ticker == exchangeBalance.ticker
+            }) {
+                return Balance(exchangeBalance, price: price.price)
             }
-            return .success((String(qr[keyRange]), String(qr[secretRange])))
-        } catch {
-            return .failure(error)
+            return nil
         }
-        
     }
     
 }
 
 enum RegexError: Error {
-    case regexFailed
+    case noKeyPairFound
 }
+

@@ -7,7 +7,6 @@
 
 import Foundation
 import SwiftUI
-import CloudKit
 
 struct Injection: EnvironmentKey {
     
@@ -17,12 +16,15 @@ struct Injection: EnvironmentKey {
     
     static var defaultValue: Self {
         let appState = Store<AppState>(AppState())
-        let cloudKitRepository = ActualCloudKitRepository(container: CKContainer.default())
-        let userSettingsInteractor = ActualUserSettingsInteractor(cloudKitRepository: cloudKitRepository,
+        let userSettingsInteractor = ActualUserSettingsInteractor(cloudKitRepository: ActualCloudKitRepository(),
                                                                   keychainRepository: ActualKeychainRepository(),
                                                                   appState: appState)
-        return .init(appState: appState, userSettingsInteractor: userSettingsInteractor,
-                     balancesInteractor: ActualBalancesInteractor())
+        let balancesInteractor = ActualBalancesInteractor(appState: appState, exchangeRepository: ActualExchangeRepository())
+        return .init(
+            appState: appState,
+            userSettingsInteractor: userSettingsInteractor,
+            balancesInteractor: balancesInteractor
+        )
     }
     
 }

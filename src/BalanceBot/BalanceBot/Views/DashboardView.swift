@@ -27,7 +27,10 @@ struct DashboardView: View {
     }
     
     var content: AnyView {
-        AnyView(containerStack(mainContent))
+        if userSettings.account.connectedExchanges.isEmpty {
+            return AnyView(connectExchangeView)
+        }
+        return AnyView(containerStack(mainContent))
     }
 
 }
@@ -35,14 +38,13 @@ struct DashboardView: View {
 extension DashboardView {
     
     var mainContent: AnyView {
-        if userSettings.account.connectedExchanges.isEmpty {
-            return AnyView(Text("Connect an Exchange to account: \(userSettings.account.id)"))
-        }
         switch balances {
-        case .notRequested: return AnyView(Text("Please Request Balances for account: \(userSettings.account.id)"))
-        case .isLoading(last: _, cancelBag: _): return AnyView(Text("Loading"))
+        case .notRequested: return AnyView(notRequestedView)
+        case .isLoading(last: let last, cancelBag: _) where last != nil:
+            return AnyView(balancesView(last!))
+        case .isLoading: return AnyView(loadingView)
         case .failed(let error): return AnyView(Text(error.localizedDescription))
-        case .loaded(let balances): return AnyView(Text("\(balances.count) Balances Loaded"))
+        case .loaded(let balances): return AnyView(balancesView(balances))
         }
     }
     
@@ -52,13 +54,22 @@ extension DashboardView {
                 .frame(maxHeight: .infinity)
             HStack {
                 Spacer()
-                dashboardButton(.target)
-                    .disabled(userSettings.account.connectedExchanges.isEmpty)
+                dashboardButton(image: "slider.horizontal.3", label: "Allocation") {
+                    print("Show Target")
+                }//.disabled(userSettings.account.connectedExchanges.isEmpty)
                 Spacer()
-                dashboardButton(.keys)
+                dashboardButton(image: "key", label: "API Keys", action: showAPIKeys)
                 Spacer()
             }.padding()
         }
+    }
+    
+    var notRequestedView: some View {
+        Text("").onAppear { injection.balancesInteractor.requestBalances(for: userSettings.account) }
+    }
+    
+    var loadingView: some View {
+        ProgressView().progressViewStyle(CircularProgressViewStyle())
     }
     
     var apiKeyView: some View {
@@ -66,44 +77,41 @@ extension DashboardView {
             .environment(\.injection, injection)
     }
     
-    func dashboardButton(_ type: DashboardButtonType) -> some View {
-        VStack(spacing: 12) {
-            Button {
-                switch type {
-                case .target: print("Show Target")
-                case .keys: showAPIKeys()
+    var connectExchangeView: some View {
+        VStack {
+            Spacer()
+            Text("BalanceBot").font(.title.bold())
+            Spacer()
+            Button(action: showAPIKeys) {
+                VStack {
+                    Text("Connect an Exchange")
+                        .font(.headline)
+                        .padding()
+                        .background(Color(red: 53 / 255, green: 53 / 255, blue: 53 / 255))
+                        .cornerRadius(8)
                 }
-            } label: {
-                Image(systemName: type.imageSystemName)
+            }
+            Spacer()
+        }
+    }
+    
+    func balancesView(_ balances: [Balance]) -> some View {
+        Text("\(balances.count) Balances Loaded")
+    }
+    
+    func dashboardButton(image: String, label: String, action: @escaping () -> Void) -> some View {
+        VStack(spacing: 12) {
+            Button(action: action) {
+                Image(systemName: image)
                     .imageScale(.large)
                     .frame(width: 64, height: 64)
                     .background(Color(red: 53 / 255, green: 53 / 255, blue: 53 / 255))
                     .cornerRadius(32)
             }
-            Text(type.displayName.uppercased())
+            Text(label.uppercased())
                 .font(.footnote.bold())
                 .foregroundColor(Color(.gray))
         }
-    }
-    
-    enum DashboardButtonType: String {
-        
-        case target, keys
-        
-        var displayName: String {
-            switch self {
-            case .keys: return "API Keys"
-            case .target: return "Allocation"
-            }
-        }
-        
-        var imageSystemName: String {
-            switch self {
-            case .keys: return "key"
-            case .target: return "slider.horizontal.3"
-            }
-        }
-        
     }
     
 }

@@ -16,6 +16,11 @@
 		B563E44027AEC31C00E7CA83 /* CancelBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E43D27AEC31C00E7CA83 /* CancelBag.swift */; };
 		B563E44427AF242E00E7CA83 /* Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E44327AF242E00E7CA83 /* Injection.swift */; };
 		B563E44627AFFBCF00E7CA83 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E44527AFFBCF00E7CA83 /* DashboardView.swift */; };
+		B579042527BC115A0038AB83 /* ExchangeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042427BC115A0038AB83 /* ExchangeRepository.swift */; };
+		B579042727BC214F0038AB83 /* Exchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042627BC214F0038AB83 /* Exchange.swift */; };
+		B579042927BC51870038AB83 /* APICall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042827BC51870038AB83 /* APICall.swift */; };
+		B579042B27BD18CB0038AB83 /* JSONSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042A27BD18CB0038AB83 /* JSONSchema.swift */; };
+		B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = B579042D27BD1FD50038AB83 /* SwiftyJSON */; };
 		B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */; };
 		B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9427AAE806008921AC /* ContentView.swift */; };
 		B5B4AD9727AAE807008921AC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9627AAE807008921AC /* Assets.xcassets */; };
@@ -38,6 +43,10 @@
 		B563E43D27AEC31C00E7CA83 /* CancelBag.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CancelBag.swift; sourceTree = "<group>"; };
 		B563E44327AF242E00E7CA83 /* Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Injection.swift; sourceTree = "<group>"; };
 		B563E44527AFFBCF00E7CA83 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		B579042427BC115A0038AB83 /* ExchangeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRepository.swift; sourceTree = "<group>"; };
+		B579042627BC214F0038AB83 /* Exchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exchange.swift; sourceTree = "<group>"; };
+		B579042827BC51870038AB83 /* APICall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APICall.swift; sourceTree = "<group>"; };
+		B579042A27BD18CB0038AB83 /* JSONSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		B5B4AD8F27AAE806008921AC /* BalanceBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceBotApp.swift; sourceTree = "<group>"; };
 		B5B4AD9427AAE806008921AC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -58,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */,
 				B55E857827B40CCB006D24C8 /* CodeScanner in Frameworks */,
 				B5B4ADAD27AC0BF0008921AC /* CloudKit.framework in Frameworks */,
 			);
@@ -81,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				B563E43727AD5ABF00E7CA83 /* CloudKitHelpers.swift */,
+				B579042A27BD18CB0038AB83 /* JSONSchema.swift */,
 				B563E44227AEDE8200E7CA83 /* Clean Architecture */,
 			);
 			path = Helpers;
@@ -92,6 +103,7 @@
 				B563E43D27AEC31C00E7CA83 /* CancelBag.swift */,
 				B563E43B27AEC31C00E7CA83 /* Loadable.swift */,
 				B563E43C27AEC31C00E7CA83 /* Store.swift */,
+				B579042827BC51870038AB83 /* APICall.swift */,
 			);
 			path = "Clean Architecture";
 			sourceTree = "<group>";
@@ -121,6 +133,7 @@
 				B5B4ADA427ABEC56008921AC /* Models.swift */,
 				B5B4ADAE27AC0DEF008921AC /* AppState.swift */,
 				B563E44327AF242E00E7CA83 /* Injection.swift */,
+				B579042627BC214F0038AB83 /* Exchange.swift */,
 				B563E44127AEC32300E7CA83 /* Helpers */,
 				B5B4ADB227AC0F5E008921AC /* Repositories */,
 				B5DDC4BA27AD425500777389 /* Interactors */,
@@ -152,6 +165,7 @@
 			children = (
 				B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */,
 				B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */,
+				B579042427BC115A0038AB83 /* ExchangeRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -183,6 +197,7 @@
 			name = BalanceBot;
 			packageProductDependencies = (
 				B55E857727B40CCB006D24C8 /* CodeScanner */,
+				B579042D27BD1FD50038AB83 /* SwiftyJSON */,
 			);
 			productName = BalanceBot;
 			productReference = B5B4AD8F27AAE806008921AC /* BalanceBot.app */;
@@ -214,6 +229,7 @@
 			mainGroup = B5B4AD8627AAE806008921AC;
 			packageReferences = (
 				B55E857627B40CCB006D24C8 /* XCRemoteSwiftPackageReference "CodeScanner" */,
+				B579042C27BD1FD50038AB83 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
 			);
 			productRefGroup = B5B4AD9027AAE806008921AC /* Products */;
 			projectDirPath = "";
@@ -249,9 +265,13 @@
 				B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */,
 				B5B4ADA727AC09F9008921AC /* CloudKitRepository.swift in Sources */,
 				B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */,
+				B579042527BC115A0038AB83 /* ExchangeRepository.swift in Sources */,
 				B563E44627AFFBCF00E7CA83 /* DashboardView.swift in Sources */,
+				B579042727BC214F0038AB83 /* Exchange.swift in Sources */,
 				B563E44427AF242E00E7CA83 /* Injection.swift in Sources */,
 				B55E857327B2C9B1006D24C8 /* APIKeyView.swift in Sources */,
+				B579042927BC51870038AB83 /* APICall.swift in Sources */,
+				B579042B27BD18CB0038AB83 /* JSONSchema.swift in Sources */,
 				B563E44027AEC31C00E7CA83 /* CancelBag.swift in Sources */,
 				B563E43827AD5ABF00E7CA83 /* CloudKitHelpers.swift in Sources */,
 				B5B4ADA527ABEC56008921AC /* Models.swift in Sources */,
@@ -477,6 +497,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		B579042C27BD1FD50038AB83 /* XCRemoteSwiftPackageReference "SwiftyJSON" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftyJSON/SwiftyJSON.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -484,6 +512,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B55E857627B40CCB006D24C8 /* XCRemoteSwiftPackageReference "CodeScanner" */;
 			productName = CodeScanner;
+		};
+		B579042D27BD1FD50038AB83 /* SwiftyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B579042C27BD1FD50038AB83 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
+			productName = SwiftyJSON;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
