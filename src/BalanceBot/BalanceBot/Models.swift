@@ -27,7 +27,6 @@ struct Portfolio: Codable, Equatable {
 struct UserSettings: Codable, Equatable {
     var account: Account
     var portfolio: Portfolio
-    
 }
 
 struct Balance: Equatable {
@@ -45,10 +44,6 @@ struct Balance: Equatable {
         exchange = exchangeBalance.exchange
     }
     
-}
-
-protocol ArrayInitialisable {
-    init(values: [Any]) throws
 }
 
 extension Array where Element == Balance.ExchangeBalance {

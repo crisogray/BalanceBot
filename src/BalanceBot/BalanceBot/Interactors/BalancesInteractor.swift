@@ -25,31 +25,19 @@ struct ActualBalancesInteractor: BalancesInteractor {
                       let key = keys["key"], let secret = keys["secret"] else {
                     return nil
                 }
-                return getBalances(on: exchange, with: key, and: secret)
-                    .replaceError(with: [])
-                    .setFailureType(to: Error.self)
+                return exchangeRepository
+                    .getBalances(on: exchange, with: key, and: secret)
                     .eraseToAnyPublisher()
             }
         ).sink { completion in
-            guard case .failure(let error) = completion else { return }
+            guard case .failure(let error) = completion else {
+                return
+            }
             appState[\.balances] = .failed(error)
         } receiveValue: { balanceCollection in
-            dump(balanceCollection)
+            dump(balanceCollection.flatMap { $0 })
             appState[\.balances] = .loaded(balanceCollection.flatMap { $0 })
         }.store(in: cancelBag)
-    }
-    
-    func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance], Error> {
-        exchangeRepository.getBalances(on: exchange, with: key, and: secret)
-            .flatMap { exchangeBalances in
-                Publishers.Zip(
-                    Just(exchangeBalances).setFailureType(to: Error.self),
-                    exchangeRepository.getPrices(for: exchangeBalances.map { $0.ticker }, on: exchange)
-                ).eraseToAnyPublisher()
-            }.flatMap { (exchangeBalances, prices) in
-                Just(exchangeBalances.convertToBalances(prices))
-                    .setFailureType(to: Error.self).eraseToAnyPublisher()
-            }.eraseToAnyPublisher()
     }
     
 }

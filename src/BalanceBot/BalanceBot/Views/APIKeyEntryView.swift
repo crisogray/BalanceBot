@@ -39,7 +39,7 @@ struct APIKeyEntryView: View {
                     Text("Loading API Key").padding(.trailing)
                     ProgressView().progressViewStyle(CircularProgressViewStyle())
                 }
-            } else {
+            } else if exchange.canQR {
                 qrButton
             }
             Spacer()

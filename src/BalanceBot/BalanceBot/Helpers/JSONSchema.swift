@@ -16,19 +16,43 @@ indirect enum JSONDecodeSchema {
     case key
 }
 
+protocol ArrayInitialisable {
+    init?(values: [Any])
+}
+
+extension Balance: ArrayInitialisable {
+    
+    init?(values: [Any]) {
+        guard let ticker = values[0] as? String,
+              let balance = values[1] as? Double ?? Double(values[1] as? String ?? ""),
+              let usdValue = values[2] as? Double ?? Double(values[2] as? String ?? ""),
+              let exchange = values[3] as? Exchange,
+              let currency = exchange.currency(from: ticker, true) else {
+                  print("Invalid initialisation of ExchangeBalance with vaues: \(values)")
+                  return nil
+              }
+        self.ticker = currency
+        self.balance = balance
+        self.usdValue = usdValue
+        self.price = usdValue / balance
+        self.exchange = exchange
+    }
+    
+}
+
 extension Balance {
     struct ExchangeBalance: ArrayInitialisable, Equatable {
         var ticker: String
         var balance: Double
         var exchange: Exchange
         
-        init(values: [Any]) throws {
+        init?(values: [Any]) {
             guard let ticker = values[0] as? String,
                   let balance = values[1] as? Double ?? Double(values[1] as? String ?? ""),
                   let exchange = values[2] as? Exchange,
                   let currency = exchange.currency(from: ticker, true) else {
-                      print(("Invalid initialisation with vaues: \(values)"))
-                      throw RegexError.noKeyPairFound
+                      print("Invalid initialisation of ExchangeBalance with vaues: \(values)")
+                      return nil
                   }
             self.ticker = currency
             self.balance = balance
@@ -41,13 +65,12 @@ extension Balance {
         var price: Double
         var ticker: String
         
-        init(values: [Any]) throws {
+        init?(values: [Any]) {
             guard let price = values[0] as? Double ?? Double(values[0] as? String ?? ""),
-                  let ticker = values[1] as? String,
-                  let exchange = values[2] as? Exchange,
+                  let ticker = values[1] as? String, let exchange = values[2] as? Exchange,
                   let currency = exchange.currency(from: ticker) else {
-                      print(("Invalid initialisation with vaues: \(values)"))
-                      throw RegexError.noKeyPairFound
+                      print("Invalid initialisation of Price with vaues: \(values)")
+                      return nil
                   }
             self.ticker = currency
             self.price = price
@@ -59,18 +82,25 @@ extension Balance {
 
 extension Exchange {
     
+    // ticker, balance, exchange
+    // if complete request: ticker, balance, usdValue, exchange
     var balancesSchema: JSONDecodeSchema {
         switch self {
         case .bitfinex: return .repeatUnit([.value(1), .value(2)], fixed: [self])
         case .kraken: return .unwrap("result", .repeatUnit([.key, .value(nil)], fixed: [self]))
+        case .coinbase: return .unwrap("data", .repeatUnit([.unwrap("balance", .value("currency")),
+                                                            .unwrap("balance", .value("amount"))], fixed: [self]))
+        case .ftx: return .unwrap("result", .repeatUnit([.value("coin"), .value("total"), .value("usdValue")], fixed: [self]))
         default: return .value("")
         }
     }
     
+    // price, ticker, exchange
     var pricesSchema: JSONDecodeSchema {
         switch self {
         case .bitfinex: return .repeatUnit([.value(7), .value(0)], fixed: [self])
         case .kraken: return .unwrap("result", .repeatUnit([.unwrap("c", .value(0)), .key], fixed: [self]))
+        case .coinbase: return .repeatUnit([.value("amount"), .value("base")], fixed: [self])
         default: return .value(nil)
         }
     }
@@ -79,11 +109,8 @@ extension Exchange {
 
 extension JSON {
     
-    func decode<Object: ArrayInitialisable>(to type: Object.Type, with schema: JSONDecodeSchema) throws -> [Object] {
-        guard let objectValues = value(with: schema) as? [[Any]] else {
-            throw RegexError.noKeyPairFound
-        }
-        return try objectValues.compactMap { try Object(values: $0) }
+    func decode<Object: ArrayInitialisable>(to type: Object.Type, with schema: JSONDecodeSchema) -> [Object] {
+        (value(with: schema) as? [[Any]] ?? []).compactMap { Object(values: $0) }
     }
     
     private func value(with schema: JSONDecodeSchema) -> Any {
@@ -95,8 +122,8 @@ extension JSON {
                     else { return value.value(with: schema) }
                 } + fixed
             }
-        case .unwrap(let key, let schema): return self[key].value(with: schema)
-        case .value(let key) where key != nil: return self[key!].rawValue
+        case let .unwrap(key, schema): return self[key].value(with: schema)
+        case let .value(key) where key != nil: return self[key!].rawValue
         case .value: return rawValue
         case .key: return ""
         }

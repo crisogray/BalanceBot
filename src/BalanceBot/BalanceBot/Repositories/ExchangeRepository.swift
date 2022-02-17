@@ -10,42 +10,60 @@ import Combine
 import SwiftyJSON
 
 protocol ExchangeRepository {
-    func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance.ExchangeBalance], Error>
+    func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance], Error>
     func getPrices(for tickers: [String], on exchange: Exchange) -> AnyPublisher<[Balance.Price], Error>
 }
 
 struct ActualExchangeRepository: ExchangeRepository {
     
-    func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance.ExchangeBalance], Error> {
-        let request = API.getBalances(exchange, key, secret).urlRequest
-        return URLSession(configuration: .default)
-            .dataTaskPublisher(for: request)
-            .tryMap { data, _ -> [Balance.ExchangeBalance] in
-                let json = try JSON(data: data)
-                let balances = try json.decode(to: Balance.ExchangeBalance.self, with: exchange.balancesSchema)
-                return balances
-            }
+    func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance], Error> {
+        let f = exchange.completeBalanceRequest ? completeBalanceRetrieval : twoStepBalanceRetrieval
+        return f (URLSession(configuration: .default)
+                    .dataTaskPublisher(for: API.getBalances(exchange, key, secret).urlRequest)
+                    .tryMap { data, _ in
+                        try JSON(data: data)
+                    }.eraseToAnyPublisher(), exchange)
+            .map { balanceList in balanceList.filter { $0.balance > 0 } }
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
+            
+    }
+    
+    private func completeBalanceRetrieval(_ publisher: AnyPublisher<JSON, Error>, _ exchange: Exchange) -> AnyPublisher<[Balance], Error> {
+        publisher.map { json -> [Balance] in
+            let balances = json.decode(to: Balance.self, with: exchange.balancesSchema)
+            return balances
+        }.eraseToAnyPublisher()
+    }
+    
+    private func twoStepBalanceRetrieval(_ publisher: AnyPublisher<JSON, Error>, _ exchange: Exchange) -> AnyPublisher<[Balance], Error> {
+        publisher.map { json -> [Balance.ExchangeBalance] in
+            return json.decode(to: Balance.ExchangeBalance.self, with: exchange.balancesSchema)
+        }.flatMap { exchangeBalances in
+            Publishers.Zip(Just(exchangeBalances).setFailureType(to: Error.self),
+                           getPrices(for: exchangeBalances.map { $0.ticker }, on: exchange))
+                .eraseToAnyPublisher()
+        }.flatMap { (exchangeBalances, prices) in
+            Just(exchangeBalances.convertToBalances(prices))
+                .setFailureType(to: Error.self).eraseToAnyPublisher()
+        }.eraseToAnyPublisher()
     }
     
     func getPrices(for tickers: [String], on exchange: Exchange) -> AnyPublisher<[Balance.Price], Error> {
-        if exchange.singlePriceRequest && tickers.count > 1 {
-            return Publishers.ZipMany(
-                tickers.map { ticker in
-                    getPrices(for: [ticker], on: exchange)
-                        .replaceError(with: [])
-                        .setFailureType(to: Error.self)
-                        .compactMap { $0.first }
-                        .eraseToAnyPublisher()
+        if tickers.isEmpty {
+            return Fail(error: RegexError.noKeyPairFound).eraseToAnyPublisher()
+        } else if exchange.singlePriceRequest && tickers.count > 1 {
+            return Publishers.ZipMany<Balance.Price?, Error>(
+                tickers.filter { $0 != "USD" }.map { ticker in
+                    return getPrices(for: [ticker], on: exchange)
+                        .map { $0.first } .eraseToAnyPublisher()
                 }
-            ).eraseToAnyPublisher()
+            ).map { prices in prices.compactMap { $0 } }.eraseToAnyPublisher()
         } else {
             return URLSession(configuration: .default)
                 .dataTaskPublisher(for: API.getPrices(exchange, tickers).urlRequest)
                 .tryMap { data, _ in
-                    let json = try JSON(data: data)
-                    return try json.decode(to: Balance.Price.self, with: exchange.pricesSchema)
+                    return try JSON(data: data).decode(to: Balance.Price.self, with: exchange.pricesSchema)
                 }
                 .receive(on: DispatchQueue.main)
                 .eraseToAnyPublisher()
@@ -79,6 +97,9 @@ extension ActualExchangeRepository.API {
         case (.bitfinex, .getPrices): return "tickers"
         case (.kraken, .getBalances): return "private/Balance"
         case (.kraken, .getPrices): return "public/Ticker"
+        case (.coinbase, .getBalances): return "accounts"
+        case (.coinbase, .getPrices(_, let tickers)): return "prices/\(tickers.first!)-USD/spot"
+        case (.ftx, .getBalances): return "wallet/balances"
         default: return ""
         }
     }
@@ -92,6 +113,7 @@ extension ActualExchangeRepository.API {
     
     private func method(_ exchange: Exchange) -> String {
         switch (exchange, self) {
+        case (.coinbase, .getBalances), (.ftx, .getBalances): return "GET"
         case (_, .getBalances): return "POST"
         default: return "GET"
         }
@@ -115,13 +137,13 @@ extension ActualExchangeRepository.API {
     }
     
     private func authenticatedRequest(_ exchange: Exchange, _ key: String, _ secret: String) -> URLRequest {
-        let body = body(exchange), path = path(exchange)
+        let body = body(exchange), path = path(exchange), method = method(exchange)
         let nonce = body["nonce"] ?? String(Int(Date.now.timeIntervalSince1970))
-        let headers = exchange.createHeaders(path: path, body: body, key: key, secret: secret, nonce: nonce)
+        let headers = exchange.createHeaders(path: path, body: body, key: key, secret: secret, nonce: nonce, method: method)
         guard let url = URL(string: exchange.authenticatedBaseUrl + path) else {
             fatalError("Invalid baseUrl and path in config for \(exchange.rawValue)")
         }
-        return createRequest(exchange, url: url, headers: headers, body: body, method: method(exchange))
+        return createRequest(exchange, url: url, headers: headers, body: body, method: method)
         
     }
     
@@ -130,12 +152,11 @@ extension ActualExchangeRepository.API {
         request.httpMethod = method
         request.allHTTPHeaderFields = headers
         if let body = body, method != "GET" {
-            var string = ""
             switch exchange {
-            case .kraken: string = body.queryString
-            default: string = body.jsonString
+            case .coinbase: return request
+            case .kraken: request.httpBody = body.queryString.data(using: .utf8)!
+            default: request.httpBody = body.jsonData
             }
-            request.httpBody = string.data(using: .utf8)!
         }
         return request
     }

@@ -61,6 +61,8 @@ extension Exchange {
         switch self {
         case .bitfinex: return "https://api-pub.bitfinex.com/v2/"
         case .kraken: return "https://api.kraken.com/0/"
+        case .coinbase: return "https://api.coinbase.com/v2/"
+        case .ftx: return "https://ftx.com/api/"
         default: return ""
         }
     }
@@ -74,38 +76,54 @@ extension Exchange {
     
     var singlePriceRequest: Bool {
         switch self {
-        case .ftx, .kraken: return true
+        case .ftx, .kraken, .coinbase: return true
         default: return false
         }
     }
     
-    func createHeaders(path: String, body: [String : String], key: String, secret: String, nonce: String) -> [String : String] {
-        //let signature = signature(for: self, path: path, body: body, secret: secret, nonce: nonce)
+    var completeBalanceRequest: Bool {
+        switch self {
+        case .ftx: return true
+        default: return false
+        }
+    }
+    
+    var canQR: Bool {
+        switch self {
+        case .bitfinex, .kraken: return true
+        default: return false
+        }
+    }
+    
+    func createHeaders(path: String, body: [String : String], key: String, secret: String, nonce: String, method: String) -> [String : String] {
         switch self {
         case .bitfinex:
             let signature = Exchange.signHMAC("/api/\(path)\(nonce)\(body.jsonString)",
-                                     hmac: HMAC<SHA384>.self, key: key, secret: secret)
+                                              hmac: HMAC<SHA384>.self, secret: secret)
             return ["Content-Type": "application/json", "bfx-nonce": nonce,
                     "bfx-apikey": key, "bfx-signature": signature]
         case .kraken:
-            let path = "/0/\(path)"
-            let encodedParams = body.queryString
-            let decodedSecret = Data(base64Encoded: secret)!
-            let digest = (nonce + encodedParams).data(using: .utf8)!
-            let encodedPath = path.data(using: .utf8)!
-            let message = SHA256.hash(data: digest)
-            let messagePath = encodedPath + message
-            let signature = Data(HMAC<SHA512>.authenticationCode(for: messagePath, using: SymmetricKey(data: decodedSecret))) //HMAC.sign(data: messagePath, algorithm: HMAC.Algorithm.sha512, key: decodedSecret)
-            //let signature = Exchange.signHMAC(string, hmac: HMAC<SHA512>.self, key: key, secret: secret)
-            print(signature.base64EncodedString())
-            print(key)
+            let secretKey = SymmetricKey(data: Data(base64Encoded: secret)!)
+            let digest = (nonce + body.queryString).data(using: .utf8)!
+            let messagePath = "/0/\(path)".data(using: .utf8)! + SHA256.hash(data: digest)
+            let signature = Data(HMAC<SHA512>.authenticationCode(for: messagePath, using: secretKey))
             return ["API-Key" : key, "API-Sign" : signature.base64EncodedString()]
-            default: return [:]
+        case .coinbase:
+            let message = nonce + method + "/v2/\(path)" + (body.isEmpty ? "" : body.jsonString)
+            let signature = Exchange.signHMAC(message, hmac: HMAC<SHA256>.self, secret: secret)
+            return ["Accept" : "application/json", "CB-ACCESS-KEY" : key,
+                    "CB-ACCESS-TIMESTAMP" : nonce, "CB-ACCESS-SIGN" : signature]
+        case .ftx:
+            let nonce = String(Int(nonce)! * 1000)
+            let message = nonce + method + "/api/\(path)"
+            let signature = Exchange.signHMAC(message, hmac: HMAC<SHA256>.self, secret: secret)
+            return ["FTX-KEY" : key, "FTX-TS" : nonce, "FTX-SIGN" : signature.lowercased()]
+        default: return [:]
         }
         
     }
     
-    static func signHMAC<H>(_ string: String, hmac: HMAC<H>.Type, key: String, secret: String) -> String {
+    static func signHMAC<H>(_ string: String, hmac: HMAC<H>.Type, secret: String) -> String {
         let key = SymmetricKey(data: secret.data(using: .utf8)!)
         let signature = hmac.authenticationCode(for: string.data(using: .utf8)!, using: key)
         return Data(signature).map { String(format: "%02hhx", $0) }.joined()
@@ -113,6 +131,17 @@ extension Exchange {
     
 }
 
+extension Data {
+    struct HexEncodingOptions: OptionSet {
+        let rawValue: Int
+        static let upperCase = HexEncodingOptions(rawValue: 1 << 0)
+    }
+
+    func hexEncodedString(options: HexEncodingOptions = []) -> String {
+        let format = options.contains(.upperCase) ? "%02hhX" : "%02hhx"
+        return self.map { String(format: format, $0) }.joined()
+    }
+}
 
 // MARK: API Response
 
@@ -124,7 +153,7 @@ extension Exchange {
         switch self {
         case .bitfinex: return "^t(.+)USD\\Z"
         case .kraken: return "^X(.+?)Z?USD\\Z"
-        default: return ""
+        default: return "^(.+)\\Z"
         }
     }
     
@@ -145,7 +174,7 @@ extension Exchange {
     func currency(from ticker: String, _ balance: Bool = false) -> String? {
         do {
             let regex = try NSRegularExpression(pattern: balance ? balanceTickerRegexPattern : priceTickerRegexPattern, options: [])
-            guard let match = regex.firstMatch(in: ticker, options: [], range: NSRange(location: 0, length: ticker.count)),
+            guard let match = regex.firstMatch(in: ticker, options: [],range: NSRange(location: 0, length: ticker.count)),
                   let currencyRange = Range(match.range(at: 1), in: ticker) else {
                       throw RegexError.noKeyPairFound
             }

@@ -18,7 +18,6 @@
 		B563E44627AFFBCF00E7CA83 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B563E44527AFFBCF00E7CA83 /* DashboardView.swift */; };
 		B579042527BC115A0038AB83 /* ExchangeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042427BC115A0038AB83 /* ExchangeRepository.swift */; };
 		B579042727BC214F0038AB83 /* Exchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042627BC214F0038AB83 /* Exchange.swift */; };
-		B579042927BC51870038AB83 /* APICall.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042827BC51870038AB83 /* APICall.swift */; };
 		B579042B27BD18CB0038AB83 /* JSONSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042A27BD18CB0038AB83 /* JSONSchema.swift */; };
 		B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = B579042D27BD1FD50038AB83 /* SwiftyJSON */; };
 		B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */; };
@@ -45,7 +44,6 @@
 		B563E44527AFFBCF00E7CA83 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		B579042427BC115A0038AB83 /* ExchangeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRepository.swift; sourceTree = "<group>"; };
 		B579042627BC214F0038AB83 /* Exchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exchange.swift; sourceTree = "<group>"; };
-		B579042827BC51870038AB83 /* APICall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APICall.swift; sourceTree = "<group>"; };
 		B579042A27BD18CB0038AB83 /* JSONSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		B5B4AD8F27AAE806008921AC /* BalanceBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceBotApp.swift; sourceTree = "<group>"; };
@@ -103,7 +101,6 @@
 				B563E43D27AEC31C00E7CA83 /* CancelBag.swift */,
 				B563E43B27AEC31C00E7CA83 /* Loadable.swift */,
 				B563E43C27AEC31C00E7CA83 /* Store.swift */,
-				B579042827BC51870038AB83 /* APICall.swift */,
 			);
 			path = "Clean Architecture";
 			sourceTree = "<group>";
@@ -270,7 +267,6 @@
 				B579042727BC214F0038AB83 /* Exchange.swift in Sources */,
 				B563E44427AF242E00E7CA83 /* Injection.swift in Sources */,
 				B55E857327B2C9B1006D24C8 /* APIKeyView.swift in Sources */,
-				B579042927BC51870038AB83 /* APICall.swift in Sources */,
 				B579042B27BD18CB0038AB83 /* JSONSchema.swift in Sources */,
 				B563E44027AEC31C00E7CA83 /* CancelBag.swift in Sources */,
 				B563E43827AD5ABF00E7CA83 /* CloudKitHelpers.swift in Sources */,
