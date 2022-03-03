@@ -5,28 +5,28 @@
 //  Created by Ben Gray on 04/02/2022.
 //
 
-import Foundation
 import CloudKit
 
 extension Account {
     
     static func new(_ id: String) -> Account {
-        Account(id: id, portfolioId: UUID().uuidString, connectedExchanges: [:], excludedBalances: [])
+        Account(id: id, portfolioId: UUID().uuidString, connectedExchanges: [:], excludedBalances: [:])
     }
     
     static func fromCKRecord(_ record: CKRecord) -> Account {
         let connectedExchangesData = record["connected_exchanges"] as! String
+        let excludedBalancesData = record["excluded_balances"] as! String
         return Account(id: record.recordID.recordName,
                 portfolioId: record["portfolio_id"] as! String,
                 connectedExchanges: connectedExchangesData.jsonDecode(type: [String : [String : String]].self),
-                excludedBalances: record["excluded_balances"] as! [String])
+                excludedBalances: excludedBalancesData.jsonDecode(type: [String : [String]].self))
     }
     
     var ckRecord: CKRecord {
         let record = CKRecord(recordType: "Account", recordID: id.ckRecordId)
         record["portfolio_id"] = portfolioId
         record["connected_exchanges"] = connectedExchanges.jsonString
-        record["excluded_balances"] = excludedBalances
+        record["excluded_balances"] = excludedBalances.jsonString
         return record
     }
     

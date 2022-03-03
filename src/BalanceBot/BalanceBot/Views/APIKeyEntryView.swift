@@ -20,28 +20,25 @@ struct APIKeyEntryView: View {
         
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(qrInput ? "Scan \(exchange.rawValue) API Key QR Code"
-                 : "Paste \(exchange.rawValue) API Keys").font(.headline)
+            Text("\(qrInput ? "Scan" : "Paste") \(exchange.rawValue) API Keys")
+                .font(.headline)
             ZStack {
                 Rectangle()
                     .aspectRatio(contentMode: .fit)
                     .foregroundColor(.init(.systemBackground))
-                if qrInput {
-                    scannerView
-                } else {
-                    stringInputs
-                }
+                if qrInput { scannerView }
+                else { stringInputs }
             }
-            if key.count > 10 && secret.count > 10 && !isLoading {
-                submitButton
-            } else if isLoading {
-                HStack {
-                    Text("Loading API Key").padding(.trailing)
-                    ProgressView().progressViewStyle(CircularProgressViewStyle())
+            HStack {
+                Spacer()
+                if exchange.canQR { qrButton }
+                if key.count > 10 && secret.count > 10 {
+                    Spacer()
+                    if isLoading { loadingView }
+                    else { submitButton }
                 }
-            } else if exchange.canQR {
-                qrButton
-            }
+                Spacer()
+            }.padding(.top)
             Spacer()
         }
         .padding()
@@ -56,7 +53,7 @@ extension APIKeyEntryView {
         VStack {
             input($key, label: "Key", placeholder: "\(exchange.rawValue) API Key")
                 .padding(.bottom)
-            input($secret, label: "Secret", placeholder: "\(exchange.rawValue) API Key Secret")
+            input($secret, label: "Secret", placeholder: "\(exchange.rawValue) API Secret")
         }.padding()
     }
     
@@ -68,10 +65,36 @@ extension APIKeyEntryView {
         }
     }
     
+    var loadingView: some View {
+        HStack {
+            Text("Loading API Key").padding(.trailing)
+            ProgressView().progressViewStyle(CircularProgressViewStyle())
+        }
+    }
+    
     var scannerView: some View {
         CodeScannerView(codeTypes: [.qr], showViewfinder: true, completion: codeScanHandler)
             .aspectRatio(1, contentMode: .fit)
             .cornerRadius(12).clipped()
+    }
+    
+    var submitButton: some View {
+        Button("Submit Keys", action: submit)
+    }
+    
+    var qrButton: some View {
+        Button(action: toggleQR) {
+            Image(systemName: "qrcode.viewfinder")
+                .font(.system(size: 32))
+        }
+    }
+    
+}
+
+extension APIKeyEntryView {
+    
+    func toggleQR() {
+        qrInput.toggle()
     }
     
     func codeScanHandler(_ response: Result<ScanResult, ScanError>) {
@@ -89,20 +112,6 @@ extension APIKeyEntryView {
         isLoading = true
         injection.userSettingsInteractor.addAPIKey(key, secret: secret,
                                                    for: exchange, to: userSettings)
-    }
-    
-    var submitButton: some View {
-        Button("Submit Keys", action: submit)
-    }
-    
-    var qrButton: some View {
-        Button {
-            qrInput.toggle()
-        } label: {
-            Image(systemName: "qrcode.viewfinder")
-                .font(.system(size: 32))
-        }
-
     }
     
 }

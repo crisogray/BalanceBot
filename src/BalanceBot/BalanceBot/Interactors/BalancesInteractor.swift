@@ -5,8 +5,8 @@
 //  Created by Ben Gray on 04/02/2022.
 //
 
-import Foundation
 import Combine
+
 protocol BalancesInteractor {
     func requestBalances(for account: Account)
 }
@@ -18,7 +18,7 @@ struct ActualBalancesInteractor: BalancesInteractor {
     
     func requestBalances(for account: Account) {
         let cancelBag = CancelBag()
-        appState[\.balances].setIsLoading(cancelBag: cancelBag)
+        appState[\.balanceList].setIsLoading(cancelBag: cancelBag)
         Publishers.ZipMany<[Balance], Error>(
             account.connectedExchanges.compactMap { exchangeName, keys in
                 guard let exchange = Exchange(rawValue: exchangeName),
@@ -33,10 +33,9 @@ struct ActualBalancesInteractor: BalancesInteractor {
             guard case .failure(let error) = completion else {
                 return
             }
-            appState[\.balances] = .failed(error)
+            appState[\.balanceList] = .failed(error)
         } receiveValue: { balanceCollection in
-            dump(balanceCollection.flatMap { $0 })
-            appState[\.balances] = .loaded(balanceCollection.flatMap { $0 })
+            appState[\.balanceList] = .loaded(BalanceList(balanceCollection.flatMap { $0 }))
         }.store(in: cancelBag)
     }
     

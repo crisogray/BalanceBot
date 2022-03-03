@@ -5,8 +5,6 @@
 //  Created by Ben Gray on 16/02/2022.
 //
 
-import Foundation
-import Combine
 import SwiftyJSON
 
 indirect enum JSONDecodeSchema {
@@ -23,10 +21,9 @@ protocol ArrayInitialisable {
 extension Balance: ArrayInitialisable {
     
     init?(values: [Any]) {
-        guard let ticker = values[0] as? String,
+        guard let ticker = values[0] as? String, let exchange = values[3] as? Exchange,
               let balance = values[1] as? Double ?? Double(values[1] as? String ?? ""),
               let usdValue = values[2] as? Double ?? Double(values[2] as? String ?? ""),
-              let exchange = values[3] as? Exchange,
               let currency = exchange.currency(from: ticker, true) else {
                   print("Invalid initialisation of ExchangeBalance with vaues: \(values)")
                   return nil
@@ -90,7 +87,7 @@ extension Exchange {
         case .kraken: return .unwrap("result", .repeatUnit([.key, .value(nil)], fixed: [self]))
         case .coinbase: return .unwrap("data", .repeatUnit([.unwrap("balance", .value("currency")),
                                                             .unwrap("balance", .value("amount"))], fixed: [self]))
-        case .ftx: return .unwrap("result", .repeatUnit([.value("coin"), .value("total"), .value("usdValue")], fixed: [self]))
+        case .ftx: return .unwrap("result", .repeatUnit([.value("coin"), .value("free"), .value("usdValue")], fixed: [self]))
         default: return .value("")
         }
     }

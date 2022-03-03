@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import CloudKit
 
 @main
 struct BalanceBotApp: App {

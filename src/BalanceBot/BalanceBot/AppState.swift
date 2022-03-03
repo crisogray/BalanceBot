@@ -5,22 +5,22 @@
 //  Created by Ben Gray on 03/02/2022.
 //
 
-import Foundation
 import CloudKit
 
 class AppState: Equatable {
     
     var userSettings: Loadable<UserSettings> = .notRequested
-    var balances: Loadable<[Balance]> = .notRequested
+    var balanceList: Loadable<BalanceList> = .notRequested
     var routing = Routing()
     
-    struct Routing {
+    struct Routing: Equatable {
         var dashboard = DashboardView.Routing()
     }
     
 }
 
 func == (lhs: AppState, rhs: AppState) -> Bool {
-    return lhs.userSettings == rhs.userSettings &&
-        lhs.balances == rhs.balances
+    lhs.userSettings == rhs.userSettings &&
+    lhs.balanceList == rhs.balanceList &&
+    lhs.routing == rhs.routing
 }

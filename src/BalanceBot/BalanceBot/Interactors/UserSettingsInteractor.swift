@@ -5,9 +5,7 @@
 //  Created by Ben Gray on 03/02/2022.
 //
 
-import Foundation
 import Combine
-import SwiftUI
 import CloudKit
 
 protocol UserSettingsInteractor {
@@ -47,12 +45,12 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     func getUserSettings(_ id: String) -> AnyPublisher<(CKRecord, CKRecord), Error> {
         cloudKitRepository
             .fetchRecord(from: .priv, withId: id.ckRecordId)
-            .flatMap { user in
-                Publishers.Zip(
-                    Just(user).setFailureType(to: Error.self),
-                    cloudKitRepository.fetchRecord(
-                        from: .pub, withId: (user["portfolio_id"] as! String).ckRecordId)
-                )
+            .flatMap { user -> AnyPublisher<(CKRecord, CKRecord), Error> in
+                let userId = user["portfolio_id"] as! String
+                return Publishers.Zip(
+                    Result.Publisher(.success(user)),
+                    cloudKitRepository.fetchRecord(from: .pub, withId: userId.ckRecordId)
+                ).eraseToAnyPublisher()
         }.eraseToAnyPublisher()
     }
     
@@ -64,7 +62,9 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
         ).eraseToAnyPublisher()
     }
     
-    func addAPIKey(_ key: String, secret: String, for exchange: Exchange, to userSettings: UserSettings) {
+    func addAPIKey(_ key: String, secret: String,
+                   for exchange: Exchange,
+                   to userSettings: UserSettings) {
         var settings = userSettings
         settings.account.connectedExchanges[exchange.rawValue] = ["key" : key, "secret" : secret]
         update(settings)
@@ -87,6 +87,9 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
                 appState[\.userSettings].cancelLoading()
             } receiveValue: { value in
                 appState[\.userSettings] = .loaded(userSettings)
+                if !portfolio {
+                    appState[\.balanceList] = .notRequested
+                }
             }.store(in: cancelBag)
     }
     

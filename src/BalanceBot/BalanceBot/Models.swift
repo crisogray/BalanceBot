@@ -5,15 +5,15 @@
 //  Created by Ben Gray on 03/02/2022.
 //
 
-import Foundation
 import CloudKit
+import Combine
 import SwiftUI
 
 struct Account: Codable, Equatable {
     var id: String
     var portfolioId: String
     var connectedExchanges: [String : [String : String]]
-    var excludedBalances: [String]
+    var excludedBalances: [String : [String]]
 }
 
 struct Portfolio: Codable, Equatable {
@@ -46,6 +46,24 @@ struct Balance: Equatable {
     
 }
 
+struct BalanceList: Equatable {
+    
+    var total: Double
+    var balances: [Balance]
+    
+    init(_ balances: [Balance]) {
+        self.balances = balances
+        total = balances.map { $0.usdValue }.reduce(0, +)
+    }
+    
+    func groupedBy(_ keyPath: KeyPath<Balance, String>) -> [String : BalanceList] {
+        [String : [Balance]]
+            .init(grouping: balances, by: { $0[keyPath: keyPath] })
+            .mapValues { BalanceList($0) }
+    }
+    
+}
+
 extension Array where Element == Balance.ExchangeBalance {
     func convertToBalances(_ prices: [Balance.Price]) -> [Balance] {
         return compactMap { exchangeBalance in
@@ -62,7 +80,7 @@ extension Array where Element == Balance.ExchangeBalance {
     
 }
 
-enum RegexError: Error {
-    case noKeyPairFound
+enum AppError: Error {
+    case noRegexMatches, invalidRequest
 }
 

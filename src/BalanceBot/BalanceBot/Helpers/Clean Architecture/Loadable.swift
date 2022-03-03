@@ -9,7 +9,7 @@
 import Foundation
 import SwiftUI
 
-// typealias LoadableSubject<Value> = Binding<Loadable<Value>>
+typealias LoadableSubject<Value> = Binding<Loadable<Value>>
 
 enum Loadable<T> {
 
@@ -17,7 +17,7 @@ enum Loadable<T> {
     case isLoading(last: T?, cancelBag: CancelBag)
     case loaded(T)
     case failed(Error)
-
+    
     var value: T? {
         switch self {
         case let .loaded(value): return value

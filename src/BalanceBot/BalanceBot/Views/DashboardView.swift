@@ -12,7 +12,7 @@ struct DashboardView: View {
     
     @Environment(\.injection) private var injection: Injection
     @State var userSettings: UserSettings
-    @State var balances: Loadable<[Balance]> = .notRequested
+    @State var balanceList: Loadable<BalanceList> = .notRequested
     @State private var routingState: Routing = .init()
     private var routingBinding: Binding<Routing> {
         $routingState.dispatched(to: injection.appState, \.routing.dashboard)
@@ -21,7 +21,7 @@ struct DashboardView: View {
     var body: some View {
         content
             .onReceive(userSettingsUpdate) { userSettings = $0.loadedValue }
-            .onReceive(balancesUpdate) { balances = $0 }
+            .onReceive(balancesUpdate) { balanceList = $0 }
             .onReceive(routingUpdate) { routingState = $0 }
             .fullScreenCover(isPresented: routingBinding.apiKeysModal, content: { apiKeyView })
     }
@@ -38,7 +38,7 @@ struct DashboardView: View {
 extension DashboardView {
     
     var mainContent: AnyView {
-        switch balances {
+        switch balanceList {
         case .notRequested: return AnyView(notRequestedView)
         case .isLoading(last: let last, cancelBag: _) where last != nil:
             return AnyView(balancesView(last!))
@@ -85,8 +85,7 @@ extension DashboardView {
             Button(action: showAPIKeys) {
                 VStack {
                     Text("Connect an Exchange")
-                        .font(.headline)
-                        .padding()
+                        .font(.headline).padding()
                         .background(Color(red: 53 / 255, green: 53 / 255, blue: 53 / 255))
                         .cornerRadius(8)
                 }
@@ -95,8 +94,19 @@ extension DashboardView {
         }
     }
     
-    func balancesView(_ balances: [Balance]) -> some View {
-        Text("\(balances.count) Balances Loaded")
+    func balancesView(_ balanceList: BalanceList) -> some View {
+        VStack(alignment: .leading) {
+            Text("Total Balance: $\(balanceList.total)")
+            let groupedBalances = balanceList.groupedBy(\Balance.ticker)
+            ForEach(Array(groupedBalances.keys), id: \.self) { ticker in
+                let balanceList = groupedBalances[ticker]!
+                let first = balanceList.balances.first!
+                Text("\(ticker) - $\(balanceList.total) - $\(first.price)")
+                ForEach(balanceList.balances, id: \.exchange) { balance in
+                    Text("\t\(balance.exchange.rawValue) - \(balance.balance) - $\(balance.usdValue)")
+                }
+            }
+        }
     }
     
     func dashboardButton(image: String, label: String, action: @escaping () -> Void) -> some View {
@@ -137,8 +147,8 @@ extension DashboardView {
         injection.appState.updates(for: \.userSettings)
     }
     
-    var balancesUpdate: AnyPublisher<Loadable<[Balance]>, Never> {
-        injection.appState.updates(for: \.balances)
+    var balancesUpdate: AnyPublisher<Loadable<BalanceList>, Never> {
+        injection.appState.updates(for: \.balanceList)
     }
     
     var routingUpdate: AnyPublisher<Routing, Never> {
