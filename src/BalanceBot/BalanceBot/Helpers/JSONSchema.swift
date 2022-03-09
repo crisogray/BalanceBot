@@ -15,17 +15,17 @@ indirect enum JSONDecodeSchema {
 }
 
 protocol ArrayInitialisable {
-    init?(values: [Any])
+    init?(_ values: [Any])
 }
 
 extension Balance: ArrayInitialisable {
     
-    init?(values: [Any]) {
+    init?(_ values: [Any]) {
         guard let ticker = values[0] as? String, let exchange = values[3] as? Exchange,
               let balance = values[1] as? Double ?? Double(values[1] as? String ?? ""),
               let usdValue = values[2] as? Double ?? Double(values[2] as? String ?? ""),
               let currency = exchange.currency(from: ticker, true) else {
-                  print("Invalid initialisation of ExchangeBalance with vaues: \(values)")
+                  print("Invalid initialisation of Balance with vaues: \(values)")
                   return nil
               }
         self.ticker = currency
@@ -38,12 +38,13 @@ extension Balance: ArrayInitialisable {
 }
 
 extension Balance {
+    
     struct ExchangeBalance: ArrayInitialisable, Equatable {
         var ticker: String
         var balance: Double
         var exchange: Exchange
         
-        init?(values: [Any]) {
+        init?(_ values: [Any]) {
             guard let ticker = values[0] as? String,
                   let balance = values[1] as? Double ?? Double(values[1] as? String ?? ""),
                   let exchange = values[2] as? Exchange,
@@ -62,7 +63,7 @@ extension Balance {
         var price: Double
         var ticker: String
         
-        init?(values: [Any]) {
+        init?(_ values: [Any]) {
             guard let price = values[0] as? Double ?? Double(values[0] as? String ?? ""),
                   let ticker = values[1] as? String, let exchange = values[2] as? Exchange,
                   let currency = exchange.currency(from: ticker) else {
@@ -72,7 +73,6 @@ extension Balance {
             self.ticker = currency
             self.price = price
         }
-        
     }
     
 }
@@ -106,8 +106,9 @@ extension Exchange {
 
 extension JSON {
     
-    func decode<Object: ArrayInitialisable>(to type: Object.Type, with schema: JSONDecodeSchema) -> [Object] {
-        (value(with: schema) as? [[Any]] ?? []).compactMap { Object(values: $0) }
+    func decode<Object: ArrayInitialisable>(
+        to type: Object.Type, with schema: JSONDecodeSchema) -> [Object] {
+        (value(with: schema) as? [[Any]] ?? []).compactMap { Object($0) }
     }
     
     private func value(with schema: JSONDecodeSchema) -> Any {
@@ -122,7 +123,7 @@ extension JSON {
         case let .unwrap(key, schema): return self[key].value(with: schema)
         case let .value(key) where key != nil: return self[key!].rawValue
         case .value: return rawValue
-        case .key: return ""
+        default: return ""
         }
     }
     

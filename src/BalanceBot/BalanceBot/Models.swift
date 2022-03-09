@@ -6,8 +6,6 @@
 //
 
 import CloudKit
-import Combine
-import SwiftUI
 
 struct Account: Codable, Equatable {
     var id: String
@@ -19,8 +17,8 @@ struct Account: Codable, Equatable {
 struct Portfolio: Codable, Equatable {
     var id: String
     var strategy: String
-    var targetAllocation: [String : Float]
-    var balances: [String : Float]
+    var targetAllocation: [String : Double]
+    var balances: [String : Double]
     var isLive: Int
 }
 
@@ -46,20 +44,30 @@ struct Balance: Equatable {
     
 }
 
-struct BalanceList: Equatable {
+typealias BalanceList = [Balance]
+
+extension BalanceList {
     
-    var total: Double
-    var balances: [Balance]
+    var total: Double { map { $0.usdValue }.reduce(0, +) }
     
-    init(_ balances: [Balance]) {
-        self.balances = balances
-        total = balances.map { $0.usdValue }.reduce(0, +)
+    func grouped<T: Hashable>(by keyPath: KeyPath<Balance, T>) -> [T : BalanceList] {
+        .init(grouping: self, by: { $0[keyPath: keyPath] })
     }
     
-    func groupedBy(_ keyPath: KeyPath<Balance, String>) -> [String : BalanceList] {
-        [String : [Balance]]
-            .init(grouping: balances, by: { $0[keyPath: keyPath] })
-            .mapValues { BalanceList($0) }
+    func sorted<T: Comparable>(_ keyPath: KeyPath<Balance, T>) -> BalanceList {
+        sorted { $0[keyPath: keyPath] > $1[keyPath: keyPath] }
+    }
+    
+}
+
+typealias GroupedBalances<T: Hashable> = [T : BalanceList]
+
+extension GroupedBalances where Value == BalanceList {
+    
+    var sortedKeys: [Key] {
+        Array(keys).sorted { one, two in
+            self[one]!.total > self[two]!.total
+        }
     }
     
 }
@@ -69,9 +77,8 @@ extension Array where Element == Balance.ExchangeBalance {
         return compactMap { exchangeBalance in
             if exchangeBalance.ticker == "USD" {
                 return Balance(exchangeBalance)
-            } else if let price = prices.first(where: { price in
-                price.ticker == exchangeBalance.ticker
-            }) {
+            } else if let price = prices.first(
+                where: { $0.ticker == exchangeBalance.ticker }) {
                 return Balance(exchangeBalance, price: price.price)
             }
             return nil

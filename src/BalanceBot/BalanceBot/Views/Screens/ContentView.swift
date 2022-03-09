@@ -14,7 +14,8 @@ struct ContentView: View {
     @State var userSettings: Loadable<UserSettings> = .notRequested
     
     var body: some View {
-        content.onReceive(userSettingsUpdate) { userSettings = $0 }
+        content
+            .onReceive(userSettingsUpdate) { userSettings = $0 }
     }
     
     var content: AnyView {
@@ -24,7 +25,7 @@ struct ContentView: View {
         case .isLoading(last: let last, cancelBag: _) where last != nil:
             return AnyView(dashboardView(last!))
         case .isLoading: return AnyView(loadingView)
-        case .loaded(let settings): return AnyView(dashboardView(settings))
+        case let .loaded(settings): return AnyView(dashboardView(settings))
         }
     }
     

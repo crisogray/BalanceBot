@@ -42,8 +42,8 @@ extension Portfolio {
         let targetAllocationData = record["target_allocation"] as! String
         let balancesData = record["balances"] as! String
         return Portfolio(id: record.recordID.recordName, strategy: record["strategy"] as! String,
-                         targetAllocation: targetAllocationData.jsonDecode(type: [String : Float].self),
-                         balances: balancesData.jsonDecode(type: [String : Float].self),
+                         targetAllocation: targetAllocationData.jsonDecode(type: [String : Double].self),
+                         balances: balancesData.jsonDecode(type: [String : Double].self),
                          isLive: record["is_live"] as! Int)
     }
     

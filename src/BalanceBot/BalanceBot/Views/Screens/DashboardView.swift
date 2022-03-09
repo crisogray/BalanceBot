@@ -21,16 +21,19 @@ struct DashboardView: View {
     var body: some View {
         content
             .onReceive(userSettingsUpdate) { userSettings = $0.loadedValue }
-            .onReceive(balancesUpdate) { balanceList = $0 }
+            .onReceive(balancesUpdate) {
+                balanceList = $0
+                if case let .loaded(balances) = $0 {
+                    injection.userSettingsInteractor.updateBalances(balances, on: userSettings)
+                }
+            }
             .onReceive(routingUpdate) { routingState = $0 }
             .fullScreenCover(isPresented: routingBinding.apiKeysModal, content: { apiKeyView })
     }
     
     var content: AnyView {
-        if userSettings.account.connectedExchanges.isEmpty {
-            return AnyView(connectExchangeView)
-        }
-        return AnyView(containerStack(mainContent))
+        userSettings.account.connectedExchanges.isEmpty ?
+        AnyView(connectExchangeView) : AnyView(containerStack(mainContent))
     }
 
 }
@@ -56,7 +59,7 @@ extension DashboardView {
                 Spacer()
                 dashboardButton(image: "slider.horizontal.3", label: "Allocation") {
                     print("Show Target")
-                }//.disabled(userSettings.account.connectedExchanges.isEmpty)
+                }
                 Spacer()
                 dashboardButton(image: "key", label: "API Keys", action: showAPIKeys)
                 Spacer()
@@ -95,18 +98,7 @@ extension DashboardView {
     }
     
     func balancesView(_ balanceList: BalanceList) -> some View {
-        VStack(alignment: .leading) {
-            Text("Total Balance: $\(balanceList.total)")
-            let groupedBalances = balanceList.groupedBy(\Balance.ticker)
-            ForEach(Array(groupedBalances.keys), id: \.self) { ticker in
-                let balanceList = groupedBalances[ticker]!
-                let first = balanceList.balances.first!
-                Text("\(ticker) - $\(balanceList.total) - $\(first.price)")
-                ForEach(balanceList.balances, id: \.exchange) { balance in
-                    Text("\t\(balance.exchange.rawValue) - \(balance.balance) - $\(balance.usdValue)")
-                }
-            }
-        }
+        BalancesView(balanceList: balanceList)
     }
     
     func dashboardButton(image: String, label: String, action: @escaping () -> Void) -> some View {

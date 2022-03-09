@@ -12,6 +12,7 @@ protocol UserSettingsInteractor {
     func fetchUserState()
     func addAPIKey(_ key: String, secret: String, for exchange: Exchange, to userSettings: UserSettings)
     func removeAPIKey(for exchange: Exchange, from userSettings: UserSettings)
+    func updateBalances(_ balances: BalanceList, on userSettings: UserSettings)
 }
 
 struct ActualUserSettingsInteractor: UserSettingsInteractor {
@@ -28,6 +29,8 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
         self.appState = appState
     }
 
+    // MARK: Initial Fetch
+    
     func fetchUserState() {
         let cancelBag = CancelBag()
         appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
@@ -37,8 +40,8 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
             .flatMap { userId in
                 getUserSettings(userId)
                     .catch { _ in createUserSettings(userId) }
-            }.sinkToUserSettings { userSettings in
-                appState[\.userSettings] = userSettings
+            }.sinkToUserSettings {
+                appState[\.userSettings] = $0
             }.store(in: cancelBag)
     }
     
@@ -62,34 +65,46 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
         ).eraseToAnyPublisher()
     }
     
+    // MARK: API Keys
+    
     func addAPIKey(_ key: String, secret: String,
                    for exchange: Exchange,
                    to userSettings: UserSettings) {
         var settings = userSettings
         settings.account.connectedExchanges[exchange.rawValue] = ["key" : key, "secret" : secret]
-        update(settings)
+        update(settings, path: \.account)
     }
     
     func removeAPIKey(for exchange: Exchange, from userSettings: UserSettings) {
         var settings = userSettings
         if let _ = settings.account.connectedExchanges.removeValue(forKey: exchange.rawValue) {
-            update(settings)
+            update(settings, path: \.account)
         }
     }
     
-    func update(_ userSettings: UserSettings, portfolio: Bool = false) {
+    // MARK: Portfolio
+    
+    func updateBalances(_ balances: BalanceList, on userSettings: UserSettings) {
+        var settings = userSettings
+        settings.portfolio.balances = balances.grouped(by: \.ticker).mapValues { $0.total }
+        update(settings, path: \.portfolio)
+    }
+    
+    
+    
+    // MARK: Update
+    
+    func update<T>(_ userSettings: UserSettings, path: KeyPath<UserSettings, T>) {
         let cancelBag = CancelBag()
         appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
-        let record = portfolio ? userSettings.portfolio.ckRecord : userSettings.account.ckRecord
+        let record = path == \.portfolio ? userSettings.portfolio.ckRecord : userSettings.account.ckRecord
         cloudKitRepository
-            .updateRecord(record, in: portfolio ? .pub : .priv)
+            .updateRecord(record, in: path == \.portfolio ? .pub : .priv)
             .sink { completion in
                 appState[\.userSettings].cancelLoading()
             } receiveValue: { value in
                 appState[\.userSettings] = .loaded(userSettings)
-                if !portfolio {
-                    appState[\.balanceList] = .notRequested
-                }
+                if path == \.account { appState[\.balanceList] = .notRequested }
             }.store(in: cancelBag)
     }
     
