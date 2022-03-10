@@ -44,8 +44,10 @@ struct APIKeyEntryView: View {
         .padding()
         .navigationTitle(exchange.rawValue)
     }
-    
+        
 }
+
+// MARK: Views
 
 extension APIKeyEntryView {
     
@@ -90,6 +92,8 @@ extension APIKeyEntryView {
     }
     
 }
+
+// MARK: Functions
 
 extension APIKeyEntryView {
     

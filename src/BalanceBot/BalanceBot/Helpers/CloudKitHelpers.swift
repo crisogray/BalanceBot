@@ -6,6 +6,7 @@
 //
 
 import CloudKit
+import Combine
 
 extension Account {
     
@@ -35,25 +36,43 @@ extension Account {
 extension Portfolio {
     
     static func new(_ id: String) -> Portfolio {
-        Portfolio(id: id, strategy: "", targetAllocation: [:], balances: [:], isLive: 0)
+        Portfolio(id: id, rebalanceTrigger: "", targetAllocation: [:], balances: [:], assetGroups: [:], isLive: 0)
     }
     
     static func fromCKRecord(_ record: CKRecord) -> Portfolio {
         let targetAllocationData = record["target_allocation"] as! String
         let balancesData = record["balances"] as! String
-        return Portfolio(id: record.recordID.recordName, strategy: record["strategy"] as! String,
+        let assetGroupsData = record["asset_groups"] as! String
+        return Portfolio(id: record.recordID.recordName,
+                         rebalanceTrigger: record["rebalance_trigger"] as! String,
                          targetAllocation: targetAllocationData.jsonDecode(type: [String : Double].self),
                          balances: balancesData.jsonDecode(type: [String : Double].self),
+                         assetGroups: assetGroupsData.jsonDecode(type: [String : [String]].self),
                          isLive: record["is_live"] as! Int)
     }
     
     var ckRecord: CKRecord {
         let record = CKRecord(recordType: "Portfolio", recordID: id.ckRecordId)
-        record["strategy"] = strategy
+        record["rebalance_trigger"] = rebalanceTrigger
         record["target_allocation"] = targetAllocation.jsonString
         record["balances"] = balances.jsonString
+        record["asset_groups"] = assetGroups.jsonString
         record["is_live"] = isLive
         return record
+    }
+    
+}
+
+extension Publisher where Output == (CKRecord, CKRecord) {
+    
+    func sinkToUserSettings(_ sendUserSettings: @escaping (Loadable<UserSettings>) -> Void) -> AnyCancellable {
+        return sink { completion in
+            guard case .failure(let error) = completion else { return }
+            sendUserSettings(.failed(error))
+        } receiveValue: { value in
+            sendUserSettings(.loaded(UserSettings(account: Account.fromCKRecord(value.0),
+                                                  portfolio: Portfolio.fromCKRecord(value.1))))
+        }
     }
     
 }

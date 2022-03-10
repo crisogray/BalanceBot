@@ -24,11 +24,14 @@ struct DashboardView: View {
             .onReceive(balancesUpdate) {
                 balanceList = $0
                 if case let .loaded(balances) = $0 {
-                    injection.userSettingsInteractor.updateBalances(balances, on: userSettings)
+                    injection.userSettingsInteractor.updateBalances(balances, in: userSettings)
                 }
             }
             .onReceive(routingUpdate) { routingState = $0 }
-            .fullScreenCover(isPresented: routingBinding.apiKeysModal, content: { apiKeyView })
+            .fullScreenCover(isPresented: routingBinding.apiKeysModal,
+                             content: { apiKeyView })
+            .fullScreenCover(isPresented: routingBinding.portfolioSettingsModal,
+                             content: { portfolioSettingsView })
     }
     
     var content: AnyView {
@@ -37,6 +40,8 @@ struct DashboardView: View {
     }
 
 }
+
+// MARK: Views
 
 extension DashboardView {
     
@@ -57,18 +62,23 @@ extension DashboardView {
                 .frame(maxHeight: .infinity)
             HStack {
                 Spacer()
-                dashboardButton(image: "slider.horizontal.3", label: "Allocation") {
-                    print("Show Target")
-                }
+                dashboardButton(image: "slider.horizontal.3",
+                                label: "Strategy",
+                                action: showPortfolioSettings)
+                    .disabled(balanceList.value == nil)
                 Spacer()
-                dashboardButton(image: "key", label: "API Keys", action: showAPIKeys)
+                dashboardButton(image: "key",
+                                label: "API Keys",
+                                action: showAPIKeys)
                 Spacer()
             }.padding()
         }
     }
     
     var notRequestedView: some View {
-        Text("").onAppear { injection.balancesInteractor.requestBalances(for: userSettings.account) }
+        loadingView.onAppear {
+            injection.balancesInteractor.requestBalances(for: userSettings.account)
+        }
     }
     
     var loadingView: some View {
@@ -76,7 +86,14 @@ extension DashboardView {
     }
     
     var apiKeyView: some View {
-        APIKeyView(userSettings: userSettings, isDisplayed: routingBinding.apiKeysModal)
+        APIKeyView(userSettings: userSettings,
+                   isDisplayed: routingBinding.apiKeysModal)
+            .environment(\.injection, injection)
+    }
+    
+    var portfolioSettingsView: some View {
+        StrategyView(isDisplayed: routingBinding.portfolioSettingsModal,
+                              userSettings: userSettings, balances: balanceList.loadedValue)
             .environment(\.injection, injection)
     }
     
@@ -86,12 +103,10 @@ extension DashboardView {
             Text("BalanceBot").font(.title.bold())
             Spacer()
             Button(action: showAPIKeys) {
-                VStack {
-                    Text("Connect an Exchange")
-                        .font(.headline).padding()
-                        .background(Color(red: 53 / 255, green: 53 / 255, blue: 53 / 255))
-                        .cornerRadius(8)
-                }
+                Text("Connect an Exchange")
+                    .font(.headline).padding()
+                    .background(Color(.secondarySystemGroupedBackground))//red: 53 / 255, green: 53 / 255, blue: 53 / 255))
+                    .cornerRadius(8)
             }
             Spacer()
         }
@@ -107,7 +122,7 @@ extension DashboardView {
                 Image(systemName: image)
                     .imageScale(.large)
                     .frame(width: 64, height: 64)
-                    .background(Color(red: 53 / 255, green: 53 / 255, blue: 53 / 255))
+                    .background(Color(.secondarySystemGroupedBackground))//red: 53 / 255, green: 53 / 255, blue: 53 / 255))
                     .cornerRadius(32)
             }
             Text(label.uppercased())
@@ -118,23 +133,35 @@ extension DashboardView {
     
 }
 
+// MARK: Functions
+
 extension DashboardView {
     
     func showAPIKeys() {
         injection.appState[\.routing.dashboard.apiKeysModal] = true
     }
     
+    func showPortfolioSettings() {
+        injection.appState[\.routing.dashboard.portfolioSettingsModal] = true
+    }
+    
 }
+
+// MARK: Routing
 
 extension DashboardView {
     
     struct Routing: Equatable {
         var apiKeysModal = false
+        var portfolioSettingsModal = false
     }
     
 }
 
+// MARK: AppState Updates
+
 extension DashboardView {
+    
     var userSettingsUpdate: AnyPublisher<Loadable<UserSettings>, Never> {
         injection.appState.updates(for: \.userSettings)
     }

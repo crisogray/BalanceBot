@@ -16,9 +16,10 @@ struct Account: Codable, Equatable {
 
 struct Portfolio: Codable, Equatable {
     var id: String
-    var strategy: String
+    var rebalanceTrigger: String
     var targetAllocation: [String : Double]
     var balances: [String : Double]
+    var assetGroups: [String : [String]]
     var isLive: Int
 }
 
@@ -48,7 +49,7 @@ typealias BalanceList = [Balance]
 
 extension BalanceList {
     
-    var total: Double { map { $0.usdValue }.reduce(0, +) }
+    var total: Double { map { $0.usdValue }.total }
     
     func grouped<T: Hashable>(by keyPath: KeyPath<Balance, T>) -> [T : BalanceList] {
         .init(grouping: self, by: { $0[keyPath: keyPath] })
@@ -60,16 +61,12 @@ extension BalanceList {
     
 }
 
-typealias GroupedBalances<T: Hashable> = [T : BalanceList]
+extension Dictionary where Value == BalanceList {
+    var sortedKeys: [Key] { keys.sorted { self[$0]!.total > self[$1]!.total } }
+}
 
-extension GroupedBalances where Value == BalanceList {
-    
-    var sortedKeys: [Key] {
-        Array(keys).sorted { one, two in
-            self[one]!.total > self[two]!.total
-        }
-    }
-    
+enum AppError: Error {
+    case noRegexMatches, invalidRequest
 }
 
 extension Array where Element == Balance.ExchangeBalance {
@@ -85,9 +82,5 @@ extension Array where Element == Balance.ExchangeBalance {
         }
     }
     
-}
-
-enum AppError: Error {
-    case noRegexMatches, invalidRequest
 }
 

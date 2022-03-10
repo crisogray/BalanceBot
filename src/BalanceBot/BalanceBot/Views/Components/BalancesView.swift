@@ -19,7 +19,7 @@ struct BalancesView: View {
             ForEach(sortedKeys[0...2], id: \.self) { ticker in
                 let balanceList = groupedBalances[ticker]!.sorted(\.balance)
                 let first = balanceList.first!
-                Text("\(ticker) - $\(balanceList.total) - $\(first.price)").padding(.top)
+                Text("\(ticker) - $\(balanceList.total) - $\(first.price)").padding(.top, 8)
                 ForEach(balanceList, id: \.exchange) { balance in
                     Text("\t\(balance.exchange.rawValue): \(balance.balance)")
                 }

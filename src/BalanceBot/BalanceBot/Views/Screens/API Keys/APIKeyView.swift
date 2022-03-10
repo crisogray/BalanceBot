@@ -17,7 +17,7 @@ struct APIKeyView: View {
     
     var body: some View {
         NavigationView {
-            exchangeList
+            content
                 .navigationTitle("API Keys")
                 .toolbar { closeToolbarItem }
                 .onReceive(userSettingsUpdate) {
@@ -29,9 +29,11 @@ struct APIKeyView: View {
     
 }
 
+// MARK: Views
+
 extension APIKeyView {
     
-    var exchangeList: some View {
+    var content: some View {
         List {
             ForEach(Exchange.sortedAllCases, id: \.self) {
                 if userSettings.account.connectedExchanges.keys.contains($0.rawValue) {
@@ -65,7 +67,7 @@ extension APIKeyView {
     func exchangeRowContent(_ exchange: Exchange, added: Bool) -> some View {
         HStack {
             Text(exchange.rawValue.uppercased())
-                .font(.title.weight(.bold))
+                .font(.title2.weight(.bold))
                 .foregroundColor(added ? .white : .gray)
                 .padding(.vertical)
             Spacer()
@@ -89,6 +91,8 @@ extension APIKeyView {
     
 }
 
+// MARK: Functions
+
 extension APIKeyView {
     func removeAPIKey(at offsets: IndexSet) {
         if let offset = offsets.first {
@@ -97,6 +101,8 @@ extension APIKeyView {
         }
     }
 }
+
+// MARK: AppState Updates
 
 extension APIKeyView {
     var userSettingsUpdate: AnyPublisher<Loadable<UserSettings>, Never> {

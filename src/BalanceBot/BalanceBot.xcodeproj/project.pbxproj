@@ -22,7 +22,8 @@
 		B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = B579042D27BD1FD50038AB83 /* SwiftyJSON */; };
 		B5A51D3427D8DD4D006E7DF9 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = B5A51D3327D8DD4D006E7DF9 /* SwiftUICharts */; };
 		B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */; };
-		B5A51D3A27D8E4E2006E7DF9 /* MiscHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3927D8E4E2006E7DF9 /* MiscHelpers.swift */; };
+		B5A51D3A27D8E4E2006E7DF9 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */; };
+		B5A51D3D27D8FAD5006E7DF9 /* StrategyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3C27D8FAD5006E7DF9 /* StrategyView.swift */; };
 		B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */; };
 		B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4AD9427AAE806008921AC /* ContentView.swift */; };
 		B5B4AD9727AAE807008921AC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9627AAE807008921AC /* Assets.xcassets */; };
@@ -49,7 +50,8 @@
 		B579042627BC214F0038AB83 /* Exchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exchange.swift; sourceTree = "<group>"; };
 		B579042A27BD18CB0038AB83 /* JSONSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalancesView.swift; sourceTree = "<group>"; };
-		B5A51D3927D8E4E2006E7DF9 /* MiscHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiscHelpers.swift; sourceTree = "<group>"; };
+		B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		B5A51D3C27D8FAD5006E7DF9 /* StrategyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrategyView.swift; sourceTree = "<group>"; };
 		B5B4AD8F27AAE806008921AC /* BalanceBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5B4AD9227AAE806008921AC /* BalanceBotApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalanceBotApp.swift; sourceTree = "<group>"; };
 		B5B4AD9427AAE806008921AC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -94,7 +96,7 @@
 			children = (
 				B563E43727AD5ABF00E7CA83 /* CloudKitHelpers.swift */,
 				B579042A27BD18CB0038AB83 /* JSONSchema.swift */,
-				B5A51D3927D8E4E2006E7DF9 /* MiscHelpers.swift */,
+				B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */,
 				B563E44227AEDE8200E7CA83 /* Clean Architecture */,
 			);
 			path = Helpers;
@@ -123,10 +125,19 @@
 			children = (
 				B5B4AD9427AAE806008921AC /* ContentView.swift */,
 				B563E44527AFFBCF00E7CA83 /* DashboardView.swift */,
+				B5A51D3C27D8FAD5006E7DF9 /* StrategyView.swift */,
+				B5A51D3B27D8F624006E7DF9 /* API Keys */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		B5A51D3B27D8F624006E7DF9 /* API Keys */ = {
+			isa = PBXGroup;
+			children = (
 				B55E857227B2C9B1006D24C8 /* APIKeyView.swift */,
 				B55E857427B4032A006D24C8 /* APIKeyEntryView.swift */,
 			);
-			path = Screens;
+			path = "API Keys";
 			sourceTree = "<group>";
 		};
 		B5B4AD8627AAE806008921AC = {
@@ -284,10 +295,11 @@
 				B5B4ADA927AC0A02008921AC /* KeychainRepository.swift in Sources */,
 				B5B4AD9527AAE806008921AC /* ContentView.swift in Sources */,
 				B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */,
+				B5A51D3D27D8FAD5006E7DF9 /* StrategyView.swift in Sources */,
 				B563E43F27AEC31C00E7CA83 /* Store.swift in Sources */,
 				B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */,
 				B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */,
-				B5A51D3A27D8E4E2006E7DF9 /* MiscHelpers.swift in Sources */,
+				B5A51D3A27D8E4E2006E7DF9 /* Helpers.swift in Sources */,
 				B5B4ADA727AC09F9008921AC /* CloudKitRepository.swift in Sources */,
 				B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */,
 				B579042527BC115A0038AB83 /* ExchangeRepository.swift in Sources */,
