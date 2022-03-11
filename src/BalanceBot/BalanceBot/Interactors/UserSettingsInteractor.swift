@@ -115,7 +115,8 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     func updateAssetGroup(_ name: String, newName: String, group: [String], in userSettings: UserSettings) {
         var assetGroups = userSettings.portfolio.assetGroups
         assetGroups.removeValue(forKey: name)
-        addAssetGroup(group, withName: newName, to: userSettings)
+        assetGroups[name] = group
+        update(userSettings, path: \.portfolio.assetGroups, isAccount: false, value: assetGroups)
     }
     
     func removeAssetGroup(_ name: String, from userSettings: UserSettings) {
