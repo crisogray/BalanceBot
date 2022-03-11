@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-struct APIKeyView: View {
+struct APIKeysView: View {
     
     @Environment(\.injection) private var injection: Injection
     @State var userSettings: UserSettings
@@ -24,14 +24,14 @@ struct APIKeyView: View {
                     userSettings = $0.loadedValue
                     if case .loaded = $0 { removingExchange = nil }
                 }
-        }
+        }.accentColor(tintColor)
     }
     
 }
 
 // MARK: Views
 
-extension APIKeyView {
+extension APIKeysView {
     
     var content: some View {
         List {
@@ -48,10 +48,7 @@ extension APIKeyView {
     func addedExchnageRow(_ exchange: Exchange, index: Int) -> some View {
         exchangeRowContent(exchange, added: true)
             .swipeActions {
-                Button("Remove") {
-                    removingExchange = exchange
-                    removeAPIKey(at: [index])
-                }
+                Button("Remove") { remove(exchange) }
             }
     }
     
@@ -93,18 +90,19 @@ extension APIKeyView {
 
 // MARK: Functions
 
-extension APIKeyView {
-    func removeAPIKey(at offsets: IndexSet) {
-        if let offset = offsets.first {
-            let exchange = Exchange.sortedAllCases[offset]
-            injection.userSettingsInteractor.removeAPIKey(for: exchange, from: userSettings)
-        }
+extension APIKeysView {
+    
+    func remove(_ exchange: Exchange) {
+        removingExchange = exchange
+        injection.userSettingsInteractor
+            .removeAPIKey(for: exchange, from: userSettings)
     }
+    
 }
 
 // MARK: AppState Updates
 
-extension APIKeyView {
+extension APIKeysView {
     var userSettingsUpdate: AnyPublisher<Loadable<UserSettings>, Never> {
         injection.appState.updates(for: \.userSettings)
     }

@@ -42,27 +42,62 @@ struct Balance: Equatable {
         usdValue = exchangeBalance.balance * price
         exchange = exchangeBalance.exchange
     }
-    
+}
+
+struct ExchangeData: Equatable {
+    var balances: BalanceList
+    var tickers: [Ticker]
 }
 
 typealias BalanceList = [Balance]
 
 extension BalanceList {
+    var usdTotal: Double { map { $0.usdValue }.total }
+}
+
+extension Array where Element: Equatable {
     
-    var total: Double { map { $0.usdValue }.total }
+    func sorted<T: Comparable>(_ keyPath: KeyPath<Element, T>, ascending: Bool = false) -> [Element] {
+        sorted { ($0[keyPath: keyPath] > $1[keyPath: keyPath]) != ascending }
+    }
     
-    func grouped<T: Hashable>(by keyPath: KeyPath<Balance, T>) -> [T : BalanceList] {
+    func grouped<T: Hashable>(by keyPath: KeyPath<Element, T>) -> [T : [Element]] {
         .init(grouping: self, by: { $0[keyPath: keyPath] })
     }
     
-    func sorted<T: Comparable>(_ keyPath: KeyPath<Balance, T>) -> BalanceList {
-        sorted { $0[keyPath: keyPath] > $1[keyPath: keyPath] }
+    func notInReplacements<T: Hashable>(_ replacements: [T : [Element]]) -> [Element] {
+        let values = replacements.values.flatMap { $0 }
+        return filter { !values.contains($0) }
+    }
+    
+    mutating func addUnique(contentsOf array: [Element]) {
+        array.forEach { element in
+            if !contains(element) {
+                append(element)
+            }
+        }
+    }
+    
+}
+
+extension Sequence where Element: Hashable {
+    
+    var unique: [Element] {
+        Array(Set(self))
     }
     
 }
 
 extension Dictionary where Value == BalanceList {
-    var sortedKeys: [Key] { keys.sorted { self[$0]!.total > self[$1]!.total } }
+    var sortedKeys: [Key] { keys.sorted { self[$0]!.usdTotal > self[$1]!.usdTotal } }
+}
+
+extension Sequence where Element == String {
+    func withReplacements(_ replacements: [String : [String]]) -> [Element] {
+        var tickers = Array(self.sorted())
+        tickers.insert(contentsOf: replacements.keys, at: 0)
+        return tickers.notInReplacements(replacements)
+    }
 }
 
 enum AppError: Error {

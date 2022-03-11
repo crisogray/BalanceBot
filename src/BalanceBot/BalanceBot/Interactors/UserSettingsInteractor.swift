@@ -13,6 +13,9 @@ protocol UserSettingsInteractor {
     func addAPIKey(_ key: String, secret: String, for exchange: Exchange, to userSettings: UserSettings)
     func removeAPIKey(for exchange: Exchange, from userSettings: UserSettings)
     func updateBalances(_ balances: BalanceList, in userSettings: UserSettings)
+    func addAssetGroup(_ group: [String], withName name: String, to userSettings: UserSettings)
+    func updateAssetGroup(_ name: String, newName: String, group: [String], in userSettings: UserSettings)
+    func removeAssetGroup(_ name: String, from userSettings: UserSettings)
 }
 
 struct ActualUserSettingsInteractor: UserSettingsInteractor {
@@ -83,47 +86,60 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     // MARK: Portfolio
     
     func updateBalances(_ balances: BalanceList, in userSettings: UserSettings) {
-        update(userSettings, path: \.portfolio.balances, account: false,
-               value: balances.grouped(by: \.ticker).mapValues { $0.total })
+        update(userSettings, path: \.portfolio.balances, isAccount: false,
+               value: balances.grouped(by: \.ticker).mapValues { $0.usdTotal })
     }
-    
-    // Update Target
-    
+        
     func updateTargetAllocation(_ targetAllocation: [String : Double], in userSettings: UserSettings) {
         var portfolio = userSettings.portfolio
         portfolio.targetAllocation = targetAllocation
         portfolio.isLive = 0
-        update(userSettings, path: \.portfolio, account: false, value: portfolio)
+        update(userSettings, path: \.portfolio, isAccount: false, value: portfolio)
     }
-    
-    // Update Strategy
-    
+        
     func updateRebalanceTrigger(_ rebalanceTrigger: String, in userSettings: UserSettings) {
-        update(userSettings, path: \.portfolio.rebalanceTrigger, account: false, value: rebalanceTrigger)
+        update(userSettings, path: \.portfolio.rebalanceTrigger, isAccount: false, value: rebalanceTrigger)
     }
     
-    // Update isLive
     
     func updateIsLive(_ isLive: Bool, in userSettings: UserSettings) {
-        update(userSettings, path: \.portfolio.isLive, account: false, value: isLive ? 1 : 0)
+        update(userSettings, path: \.portfolio.isLive, isAccount: false, value: isLive ? 1 : 0)
+    }
+    
+    func addAssetGroup(_ group: [String], withName name: String, to userSettings: UserSettings) {
+        var assetGroups = userSettings.portfolio.assetGroups
+        assetGroups[name] = group
+        update(userSettings, path: \.portfolio.assetGroups, isAccount: false, value: assetGroups)
+    }
+    
+    func updateAssetGroup(_ name: String, newName: String, group: [String], in userSettings: UserSettings) {
+        var assetGroups = userSettings.portfolio.assetGroups
+        assetGroups.removeValue(forKey: name)
+        addAssetGroup(group, withName: newName, to: userSettings)
+    }
+    
+    func removeAssetGroup(_ name: String, from userSettings: UserSettings) {
+        var assetGroups = userSettings.portfolio.assetGroups
+        assetGroups.removeValue(forKey: name)
+        update(userSettings, path: \.portfolio.assetGroups, isAccount: false, value: assetGroups)
     }
     
     // MARK: Update
     
     func update<T>(_ userSettings: UserSettings, path: WritableKeyPath<UserSettings, T>,
-                   account: Bool = true, value: T) {
+                   isAccount: Bool = true, value: T) {
         var settings = userSettings
         settings[keyPath: path] = value
         let cancelBag = CancelBag()
         appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
-        let record = account ? settings.account.ckRecord : settings.portfolio.ckRecord
+        let record = isAccount ? settings.account.ckRecord : settings.portfolio.ckRecord
         cloudKitRepository
-            .updateRecord(record, in: account ? .priv : .pub)
+            .updateRecord(record, in: isAccount ? .priv : .pub)
             .sink { completion in
                 appState[\.userSettings].cancelLoading()
             } receiveValue: { value in
                 appState[\.userSettings] = .loaded(settings)
-                if account { appState[\.balanceList] = .notRequested }
+                if isAccount { appState[\.exchangeData] = .notRequested }
             }.store(in: cancelBag)
     }
     

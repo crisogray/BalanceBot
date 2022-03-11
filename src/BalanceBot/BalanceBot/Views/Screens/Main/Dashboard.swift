@@ -12,7 +12,7 @@ struct DashboardView: View {
     
     @Environment(\.injection) private var injection: Injection
     @State var userSettings: UserSettings
-    @State var balanceList: Loadable<BalanceList> = .notRequested
+    @State var exchangeData: Loadable<ExchangeData> = .notRequested
     @State private var routingState: Routing = .init()
     private var routingBinding: Binding<Routing> {
         $routingState.dispatched(to: injection.appState, \.routing.dashboard)
@@ -21,10 +21,10 @@ struct DashboardView: View {
     var body: some View {
         content
             .onReceive(userSettingsUpdate) { userSettings = $0.loadedValue }
-            .onReceive(balancesUpdate) {
-                balanceList = $0
-                if case let .loaded(balances) = $0 {
-                    injection.userSettingsInteractor.updateBalances(balances, in: userSettings)
+            .onReceive(exchangeUpdate) {
+                exchangeData = $0
+                if case let .loaded(exchangeData) = $0 {
+                    injection.userSettingsInteractor.updateBalances(exchangeData.balances, in: userSettings)
                 }
             }
             .onReceive(routingUpdate) { routingState = $0 }
@@ -46,13 +46,13 @@ struct DashboardView: View {
 extension DashboardView {
     
     var mainContent: AnyView {
-        switch balanceList {
+        switch exchangeData {
         case .notRequested: return AnyView(notRequestedView)
         case .isLoading(last: let last, cancelBag: _) where last != nil:
             return AnyView(balancesView(last!))
         case .isLoading: return AnyView(loadingView)
-        case .failed(let error): return AnyView(Text(error.localizedDescription))
-        case .loaded(let balances): return AnyView(balancesView(balances))
+        case let .failed(error): return AnyView(Text(error.localizedDescription))
+        case let .loaded(exchangeData): return AnyView(balancesView(exchangeData))
         }
     }
     
@@ -65,7 +65,7 @@ extension DashboardView {
                 dashboardButton(image: "slider.horizontal.3",
                                 label: "Strategy",
                                 action: showPortfolioSettings)
-                    .disabled(balanceList.value == nil)
+                    .disabled(exchangeData.value == nil)
                 Spacer()
                 dashboardButton(image: "key",
                                 label: "API Keys",
@@ -77,7 +77,7 @@ extension DashboardView {
     
     var notRequestedView: some View {
         loadingView.onAppear {
-            injection.balancesInteractor.requestBalances(for: userSettings.account)
+            injection.exchangesInteractor.fetchExchangeData(for: userSettings.account)
         }
     }
     
@@ -86,14 +86,14 @@ extension DashboardView {
     }
     
     var apiKeyView: some View {
-        APIKeyView(userSettings: userSettings,
+        APIKeysView(userSettings: userSettings,
                    isDisplayed: routingBinding.apiKeysModal)
             .environment(\.injection, injection)
     }
     
     var portfolioSettingsView: some View {
         StrategyView(isDisplayed: routingBinding.portfolioSettingsModal,
-                              userSettings: userSettings, balances: balanceList.loadedValue)
+                     userSettings: userSettings, exchangeData: exchangeData.loadedValue)
             .environment(\.injection, injection)
     }
     
@@ -112,8 +112,8 @@ extension DashboardView {
         }
     }
     
-    func balancesView(_ balanceList: BalanceList) -> some View {
-        BalancesView(balanceList: balanceList)
+    func balancesView(_ exchangeData: ExchangeData) -> some View {
+        BalancesView(exchangeData: exchangeData)
     }
     
     func dashboardButton(image: String, label: String, action: @escaping () -> Void) -> some View {
@@ -166,8 +166,8 @@ extension DashboardView {
         injection.appState.updates(for: \.userSettings)
     }
     
-    var balancesUpdate: AnyPublisher<Loadable<BalanceList>, Never> {
-        injection.appState.updates(for: \.balanceList)
+    var exchangeUpdate: AnyPublisher<Loadable<ExchangeData>, Never> {
+        injection.appState.updates(for: \.exchangeData)
     }
     
     var routingUpdate: AnyPublisher<Routing, Never> {

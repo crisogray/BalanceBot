@@ -10,7 +10,7 @@ import CloudKit
 class AppState: Equatable {
     
     var userSettings: Loadable<UserSettings> = .notRequested
-    var balanceList: Loadable<BalanceList> = .notRequested
+    var exchangeData: Loadable<ExchangeData> = .notRequested
     var routing = Routing()
     
     struct Routing: Equatable {
@@ -21,6 +21,6 @@ class AppState: Equatable {
 
 func == (lhs: AppState, rhs: AppState) -> Bool {
     lhs.userSettings == rhs.userSettings &&
-    lhs.balanceList == rhs.balanceList &&
+    lhs.exchangeData == rhs.exchangeData &&
     lhs.routing == rhs.routing
 }

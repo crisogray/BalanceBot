@@ -11,18 +11,18 @@ struct Injection: EnvironmentKey {
     
     let appState: Store<AppState>
     let userSettingsInteractor: UserSettingsInteractor
-    let balancesInteractor: BalancesInteractor
+    let exchangesInteractor: ExchangesInteractor
     
     static var defaultValue: Self {
         let appState = Store<AppState>(AppState())
         let userSettingsInteractor = ActualUserSettingsInteractor(cloudKitRepository: ActualCloudKitRepository(),
                                                                   keychainRepository: ActualKeychainRepository(),
                                                                   appState: appState)
-        let balancesInteractor = ActualBalancesInteractor(appState: appState, exchangeRepository: ActualExchangeRepository())
+        let exchangesInteractor = RealExchangesInteractor(appState: appState, exchangeRepository: ActualExchangeRepository())
         return .init(
             appState: appState,
             userSettingsInteractor: userSettingsInteractor,
-            balancesInteractor: balancesInteractor
+            exchangesInteractor: exchangesInteractor
         )
     }
     

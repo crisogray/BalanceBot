@@ -55,3 +55,22 @@ extension Array where Element == Double {
     var total: Double { reduce(0, +)}
 }
 
+// Equatable
+
+extension Equatable {
+    
+    func equals<T: Equatable>(_ equatable: Self, at path: KeyPath<Self, T>) -> Bool {
+        return self[keyPath: path] == equatable[keyPath: path]
+    }
+    
+}
+
+// String
+
+extension String {
+    
+    var trimmed: String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+}

@@ -13,6 +13,7 @@ import CryptoKit
 protocol ExchangeRepository {
     func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance], Error>
     func getPrices(for tickers: [String], on exchange: Exchange) -> AnyPublisher<[Balance.Price], Error>
+    func getTickers(on exchange: Exchange) -> AnyPublisher<[Ticker], Error>
 }
 
 struct ActualExchangeRepository: ExchangeRepository {
@@ -76,6 +77,18 @@ struct ActualExchangeRepository: ExchangeRepository {
         }
     }
     
+    // MARK: Get Tickers
+    
+    func getTickers(on exchange: Exchange) -> AnyPublisher<[Ticker], Error> {
+        return URLSession(configuration: .default)
+            .dataTaskPublisher(for: API.getTickers(exchange).urlRequest)
+            .tryMap {
+                return try JSON(data: $0.data)
+                    .decode(to: Ticker.self, with: exchange.tickersSchema)
+            }
+            .eraseToAnyPublisher()
+    }
+    
 }
 
 // MARK: API
@@ -84,6 +97,7 @@ extension ActualExchangeRepository {
     enum API {
         case getBalances(Exchange, String, String)
         case getPrices(Exchange, [String])
+        case getTickers(Exchange)
     }
 }
 
@@ -95,6 +109,11 @@ extension ActualExchangeRepository.API {
             return authenticatedRequest(exchange, key, secret)
         case let .getPrices(exchange, tickers):
             return pricesRequest(exchange, tickers: tickers)
+        case let .getTickers(exchange):
+            guard let url = URL(string: exchange.publicBaseURL + path(exchange)) else {
+                fatalError("Invalid tickers URL")
+            }
+            return createRequest(exchange, url: url, headers: [:])
         }
     }
     
@@ -104,11 +123,15 @@ extension ActualExchangeRepository.API {
         switch (exchange, self) {
         case (.bitfinex, .getBalances): return "v2/auth/r/wallets"
         case (.bitfinex, .getPrices): return "tickers"
+        case (.bitfinex, .getTickers): return "tickers?symbols=ALL"
         case (.kraken, .getBalances): return "private/Balance"
         case (.kraken, .getPrices): return "public/Ticker"
+        case (.kraken, .getTickers): return "public/Assets"
         case (.coinbase, .getBalances): return "accounts"
         case (.coinbase, .getPrices(_, let tickers)): return "prices/\(tickers.first!)-USD/spot"
+        case (.coinbase, .getTickers): return "currencies"
         case (.ftx, .getBalances): return "wallet/balances"
+        case (.ftx, .getTickers): return "markets"
         default: return ""
         }
     }
@@ -194,7 +217,6 @@ extension ActualExchangeRepository.API {
             let message = nonce + method + "/api/\(path)"
             let signature = signHMAC(message, hmac: HMAC<SHA256>.self, secret: secret)
             return ["FTX-KEY" : key, "FTX-TS" : nonce, "FTX-SIGN" : signature]
-        default: return [:]
         }
         
     }

@@ -13,7 +13,6 @@ import Combine
 enum Exchange: String, CaseIterable {
     
     case bitfinex = "Bitfinex",
-         binance = "Binance",
          ftx = "FTX",
          kraken = "Kraken",
          coinbase = "Coinbase"
@@ -62,7 +61,6 @@ extension Exchange {
         case .kraken: return "https://api.kraken.com/0/"
         case .coinbase: return "https://api.coinbase.com/v2/"
         case .ftx: return "https://ftx.com/api/"
-        default: return ""
         }
     }
     
@@ -99,7 +97,7 @@ extension Exchange {
     
     var priceTickerRegexPattern: String {
         switch self {
-        case .bitfinex: return "^t(.+)USD\\Z"
+        case .bitfinex: return "^t(.+?)(USD)?(BTC)?(ETH)?$"
         case .kraken: return "^X(.+?)Z?USD\\Z"
         default: return "^(.+)\\Z"
         }
