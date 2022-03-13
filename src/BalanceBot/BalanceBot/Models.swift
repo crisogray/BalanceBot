@@ -14,16 +14,16 @@ struct Account: Codable, Equatable {
     var excludedBalances: [String : [String]]
 }
 
-struct Portfolio: Codable, Equatable {
+struct Portfolio: Equatable {
     var id: String
-    var rebalanceTrigger: String
+    var rebalanceTrigger: RebalanceTrigger
     var targetAllocation: [String : Double]
     var balances: [String : Double]
     var assetGroups: [String : [String]]
     var isLive: Int
 }
 
-struct UserSettings: Codable, Equatable {
+struct UserSettings: Equatable {
     var account: Account
     var portfolio: Portfolio
 }
@@ -55,49 +55,45 @@ extension BalanceList {
     var usdTotal: Double { map { $0.usdValue }.total }
 }
 
-extension Array where Element: Equatable {
+
+enum RebalanceTrigger: Hashable {
     
-    func sorted<T: Comparable>(_ keyPath: KeyPath<Element, T>, ascending: Bool = false) -> [Element] {
-        sorted { ($0[keyPath: keyPath] > $1[keyPath: keyPath]) != ascending }
+    enum CalendarSchedule: String, CaseIterable {
+        case monthly, quarterly, sixMonthly = "six-monthly", yearly
+        
+        var displayString: String {
+            rawValue.capitalized
+        }
+        
     }
     
-    func grouped<T: Hashable>(by keyPath: KeyPath<Element, T>) -> [T : [Element]] {
-        .init(grouping: self, by: { $0[keyPath: keyPath] })
-    }
+    case calendar(CalendarSchedule)
+    case threshold(Int)
     
-    func notInReplacements<T: Hashable>(_ replacements: [T : [Element]]) -> [Element] {
-        let values = replacements.values.flatMap { $0 }
-        return filter { !values.contains($0) }
-    }
-    
-    mutating func addUnique(contentsOf array: [Element]) {
-        array.forEach { element in
-            if !contains(element) {
-                append(element)
-            }
+    var storedString: String {
+        switch self {
+        case .calendar(let schedule): return "calendar:\(schedule.rawValue)"
+        case .threshold(let int): return "threshold:\(int)"
         }
     }
     
 }
 
-extension Sequence where Element: Hashable {
-    
-    var unique: [Element] {
-        Array(Set(self))
+extension RebalanceTrigger {
+    init(_ string: String) {
+        let components = string.lowercased().components(separatedBy: ":")
+        self = components[0] == "calendar" ?
+            .calendar(.init(rawValue: components[1])!) :
+            .threshold(Int(components[1])!)
     }
     
-}
-
-extension Dictionary where Value == BalanceList {
-    var sortedKeys: [Key] { keys.sorted { self[$0]!.usdTotal > self[$1]!.usdTotal } }
-}
-
-extension Sequence where Element == String {
-    func withReplacements(_ replacements: [String : [String]]) -> [Element] {
-        var tickers = Array(self.sorted())
-        tickers.insert(contentsOf: replacements.keys, at: 0)
-        return tickers.notInReplacements(replacements)
+    func isSameType(as other: RebalanceTrigger) -> Bool {
+        switch (self, other) {
+        case (.calendar, .calendar), (.threshold, .threshold): return true
+        default: return false
+        }
     }
+    
 }
 
 enum AppError: Error {

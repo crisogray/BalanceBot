@@ -8,13 +8,27 @@
 import SwiftUI
 import Combine
 
+
+
 struct StrategyView: View {
     
     @Environment(\.injection) private var injection: Injection
     @Binding var isDisplayed: Bool
     @State var userSettings: UserSettings
     @State var exchangeData: ExchangeData
+    
+    // Input Variables
     @State var targetAllocation: [String : Double] = [:]
+    @State var rebalanceTrigger: RebalanceTrigger = .calendar(.monthly)
+    @State var rebalanceTriggerDetail: RebalanceTrigger = .calendar(.monthly)
+    @State var isLive = false
+    
+
+    // Loadings
+    @State var isLoadingTargetAllocation = false
+    @State var isLoadingIsLive = false
+    @State var firstAppear = true
+
     private var total: Double { Array(targetAllocation.values).total }
     
     var body: some View {
@@ -22,20 +36,40 @@ struct StrategyView: View {
             content
                 .navigationTitle("Strategy")
                 .toolbar { closeToolbarItem }
-                .onReceive(userSettingsUpdate) {
-                    if !$0.loadedValue.equals(userSettings, at: \.portfolio.targetAllocation) {
-                        targetAllocation = userSettings.portfolio.targetAllocation
+                .onReceive(userSettingsUpdate, perform: handleUserSettingsUpdate)
+                .onChange(of: isLive) { newValue in
+                    if (userSettings.portfolio.isLive != 0) != newValue {
+                        injection.userSettingsInteractor
+                            .updateIsLive(newValue, in: userSettings)
+                        isLoadingIsLive = true
                     }
-                    userSettings = $0.loadedValue
+                }
+                .onChange(of: rebalanceTrigger) { newValue in
+                    if !newValue.isSameType(as: rebalanceTriggerDetail) {
+                        rebalanceTriggerDetail = newValue
+                    }
+                }
+                .onChange(of: rebalanceTriggerDetail) { newValue in
+                    if userSettings.portfolio.rebalanceTrigger != newValue {
+                        injection.userSettingsInteractor
+                            .updateRebalanceTrigger(newValue, in: userSettings)
+                    }
                 }
         }
-        .onAppear { targetAllocation = userSettings.portfolio.targetAllocation  }
+        .onAppear {
+            if firstAppear {
+                targetAllocation = userSettings.portfolio.targetAllocation
+                rebalanceTriggerDetail = userSettings.portfolio.rebalanceTrigger
+                if case .calendar = userSettings.portfolio.rebalanceTrigger {
+                    rebalanceTrigger = .calendar(.monthly)
+                } else { rebalanceTrigger = .threshold(10) }
+                isLive = userSettings.portfolio.isLive != 0
+                firstAppear = false
+            }
+        }
         .accentColor(tintColor)
     }
     
-    @State var toggle = false
-    @State var strategy = ""
-
 }
 
 // MARK: Views
@@ -46,11 +80,24 @@ extension StrategyView {
         VStack(spacing: 0) {
             List {
                 Section(header: Text("Portfolio Settings")) {
-                    Toggle("isLive", isOn: $toggle).font(.headline)
-                        .disabled(targetAllocation != userSettings.portfolio.targetAllocation || total != 100)
-                    Picker("Rebalance Trigger", selection: $strategy) {
-                        Text("Threshold").tag("t")
-                        Text("Calendar").tag("c")
+                    Toggle("Strategy Active", isOn: $isLive)
+                        .disabled(targetAllocation != userSettings.portfolio.targetAllocation || total != 100 || isLoadingIsLive)
+                    Picker("Rebalance Trigger", selection: $rebalanceTrigger) {
+                        Text("Calendar").tag(RebalanceTrigger.calendar(.monthly))
+                        Text("Threshold").tag(RebalanceTrigger.threshold(10))
+                    }
+                    if case .calendar = rebalanceTrigger {
+                        Picker("Regularity", selection: $rebalanceTriggerDetail) {
+                            ForEach(RebalanceTrigger.CalendarSchedule.allCases, id: \.self) {
+                                Text($0.displayString).tag(RebalanceTrigger.calendar($0))
+                            }
+                        }
+                    } else {
+                        Picker("Threshold", selection: $rebalanceTriggerDetail) {
+                            ForEach(Array(stride(from: 5, through: 20, by: 5)), id: \.self) {
+                                Text("\($0)%").tag(RebalanceTrigger.threshold($0))
+                            }
+                        }
                     }
                     NavigationLink("Asset Groups", destination: assetGroupsView)
                 }
@@ -64,6 +111,7 @@ extension StrategyView {
                             .foregroundColor(percentage > 0 ? .white : .gray)
                     }
                 }
+                
             }
             if targetAllocation != userSettings.portfolio.targetAllocation {
                 HStack(spacing: 16) {
@@ -84,26 +132,31 @@ extension StrategyView {
                         .font(.title2.bold())
                     if let subTickers = userSettings.portfolio.assetGroups[ticker] {
                         Text("\(subTickers.joined(separator: ", "))")
+                            .lineLimit(1)
                             .font(.footnote)
                     }
                 }.padding(.vertical)
-            } onIncrement: { increment(ticker)
-            } onDecrement: { decrement(ticker) }
+            } onIncrement: { increment(ticker) } onDecrement: { decrement(ticker) }
             Spacer()
             Text("\(Int(percentage))%")
                 .frame(width: 80, alignment: .trailing)
                 .font(.title.weight(.heavy))
-        }
+        }.animation(.none, value: targetAllocation)
     }
     
     var saveButton: some View {
         Button(action: saveTargetAllocation) {
-            Text("Save Allocation")
-                .frame(maxWidth: .infinity)
-                .font(.headline).padding()
-                .background(Color(.secondarySystemGroupedBackground))//(red: 53 / 255, green: 53 / 255, blue: 53 / 255))
-                .cornerRadius(8)
-        }.disabled(total != 100 || targetAllocation == userSettings.portfolio.targetAllocation)
+            Group {
+                if isLoadingTargetAllocation { LoadingView() }
+                else { Text("Save Allocation") }
+            }
+            .frame(maxWidth: .infinity)
+            .font(.headline).padding()
+            .background(Color(.secondarySystemGroupedBackground)) // (red: 53 / 255, green: 53 / 255, blue: 53 / 255))
+            .cornerRadius(8)
+        }.disabled(total != 100 ||
+                   targetAllocation == userSettings.portfolio.targetAllocation ||
+                   isLoadingTargetAllocation)
     }
     
     var allocationPercentage:  some View {
@@ -117,9 +170,7 @@ extension StrategyView {
     
     var closeToolbarItem: ToolbarItem<(), Button<Text>> {
         ToolbarItem(placement: .primaryAction) {
-            Button("Close") {
-                isDisplayed = false
-            }
+            Button("Close") { isDisplayed = false }
         }
     }
     
@@ -135,29 +186,60 @@ extension StrategyView {
 extension StrategyView {
     
     func increment(_ ticker: String) {
-        if let value = targetAllocation[ticker] {
-            targetAllocation[ticker] = min(value + 5, 100)
-        } else {
+        let value = targetAllocation[ticker] ?? 0
+        assignTicker(ticker, value: min(value + 5, 100))
+    }
+    
+    func decrement(_ ticker: String) {
+        if let value = targetAllocation[ticker], value > 5 {
+            assignTicker(ticker, value: value - 5)
+        } else if targetAllocation[ticker] != nil {
             withAnimation {
-                targetAllocation[ticker] = 5
+                _ = targetAllocation.removeValue(forKey: ticker)
             }
         }
     }
     
-    func decrement(_ ticker: String) {
-        if let value = targetAllocation[ticker] {
-            if value > 5 {
-                targetAllocation[ticker] = value - 5
-            } else {
-                withAnimation {
-                    _ = targetAllocation.removeValue(forKey: ticker)
-                }
+    func assignTicker(_ ticker: String, value: Double) {
+        var test = targetAllocation
+        test[ticker] = value
+        if test == userSettings.portfolio.targetAllocation ||
+            (targetAllocation == userSettings.portfolio.targetAllocation) {
+            withAnimation {
+                targetAllocation[ticker] = value
             }
+        } else {
+            targetAllocation[ticker] = value
         }
     }
     
     func saveTargetAllocation() {
-        print("Save Allocation")
+        isLoadingTargetAllocation = true
+        injection.userSettingsInteractor
+            .updateTargetAllocation(targetAllocation, in: userSettings)
+    }
+    
+    // Needs streamlining
+    func handleUserSettingsUpdate(_ newSettings: Loadable<UserSettings>) {
+        let newSettings = newSettings.loadedValue
+        if !newSettings.equals(userSettings, at: \.portfolio.isLive) {
+            isLoadingIsLive = false
+            if isLive != (newSettings.portfolio.isLive != 0) {
+                isLive = newSettings.portfolio.isLive != 0
+            }
+        }
+        if !newSettings.equals(userSettings, at: \.portfolio.targetAllocation) {
+            isLoadingTargetAllocation = false
+            if targetAllocation != newSettings.portfolio.targetAllocation {
+                targetAllocation = newSettings.portfolio.targetAllocation
+            }
+            withAnimation { userSettings = newSettings }
+        } else if !newSettings.equals(userSettings, at: \.portfolio) &&
+                    !newSettings.equals(userSettings, at: \.portfolio.targetAllocation) {
+            targetAllocation = userSettings.portfolio.targetAllocation
+        } else {
+            userSettings = newSettings
+        }
     }
     
 }

@@ -46,4 +46,5 @@ let allowedTickers = ["BTC", "ETH", "USDT", "BNB", "USDC", "XRP", "LUNA", "ADA",
                       "WIN", "TRIBE", "MXC", "CSPR", "INJ", "SUPER", "SRM", "POWR",
                       "TWT", "CELR", "DENT", "WRX", "XCH", "C98", "XNO", "CEEK",
                       "XYO", "ONG", "PYR", "RAY", "MED", "COTI", "CHR", "ORBS",
-                      "FX", "SNT", "ARDR", "REQ", "PUNDIX", "CFX", "MDX", "RGT"]
+                      "FX", "SNT", "ARDR", "REQ", "PUNDIX", "CFX", "MDX", "RGT",
+                      "USD", "GBP", "EUR", "JPY"]

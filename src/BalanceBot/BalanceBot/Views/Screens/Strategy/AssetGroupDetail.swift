@@ -27,7 +27,7 @@ struct AssetGroupDetailView: View {
            group == currentGroup {
             return false
         }
-        return group.count > 1 && name.trimmingCharacters(in: .whitespacesAndNewlines) != ""
+        return group.count > 1 && name.trimmed != "" && !tickers.contains(name.trimmed.uppercased())
     }
     
     private var tickers: [String] {
@@ -111,7 +111,7 @@ extension AssetGroupDetailView {
         if let oldName = currentName {
             injection.userSettingsInteractor
                 .updateAssetGroup(oldName.trimmed, newName: name.trimmed,
-                                  group: group, in: userSettings)
+                                  newGroup: group, in: userSettings)
         } else {
             injection.userSettingsInteractor
                 .addAssetGroup(group, withName: name.trimmed, to: userSettings)

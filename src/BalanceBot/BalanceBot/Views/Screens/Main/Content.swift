@@ -34,7 +34,7 @@ struct ContentView: View {
 extension ContentView {
     
     var notRequestedView: some View {
-        Text("").onAppear { injection.userSettingsInteractor.fetchUserState() }
+        Text("").onAppear { injection.userSettingsInteractor.fetchUserSettings() }
     }
     
     var loadingView: some View {

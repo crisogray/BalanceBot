@@ -36,7 +36,8 @@ extension Account {
 extension Portfolio {
     
     static func new(_ id: String) -> Portfolio {
-        Portfolio(id: id, rebalanceTrigger: "", targetAllocation: [:], balances: [:], assetGroups: [:], isLive: 0)
+        Portfolio(id: id, rebalanceTrigger: .calendar(.monthly), targetAllocation: [:],
+                  balances: [:], assetGroups: [:], isLive: 0)
     }
     
     static func fromCKRecord(_ record: CKRecord) -> Portfolio {
@@ -44,7 +45,7 @@ extension Portfolio {
         let balancesData = record["balances"] as! String
         let assetGroupsData = record["asset_groups"] as! String
         return Portfolio(id: record.recordID.recordName,
-                         rebalanceTrigger: record["rebalance_trigger"] as! String,
+                         rebalanceTrigger: RebalanceTrigger(record["rebalance_trigger"] as! String),
                          targetAllocation: targetAllocationData.jsonDecode(type: [String : Double].self),
                          balances: balancesData.jsonDecode(type: [String : Double].self),
                          assetGroups: assetGroupsData.jsonDecode(type: [String : [String]].self),
@@ -53,7 +54,7 @@ extension Portfolio {
     
     var ckRecord: CKRecord {
         let record = CKRecord(recordType: "Portfolio", recordID: id.ckRecordId)
-        record["rebalance_trigger"] = rebalanceTrigger
+        record["rebalance_trigger"] = rebalanceTrigger.storedString
         record["target_allocation"] = targetAllocation.jsonString
         record["balances"] = balances.jsonString
         record["asset_groups"] = assetGroups.jsonString

@@ -9,13 +9,23 @@ import Combine
 import CloudKit
 
 protocol UserSettingsInteractor {
-    func fetchUserState()
+    func fetchUserSettings()
+    
+    // API Keys
     func addAPIKey(_ key: String, secret: String, for exchange: Exchange, to userSettings: UserSettings)
     func removeAPIKey(for exchange: Exchange, from userSettings: UserSettings)
+    
+    // Portfolio
     func updateBalances(_ balances: BalanceList, in userSettings: UserSettings)
+    func updateTargetAllocation(_ targetAllocation: [String : Double], in userSettings: UserSettings)
+    func updateRebalanceTrigger(_ rebalanceTrigger: RebalanceTrigger, in userSettings: UserSettings)
+    func updateIsLive(_ isLive: Bool, in userSettings: UserSettings)
+    
+    // Asset Groups
     func addAssetGroup(_ group: [String], withName name: String, to userSettings: UserSettings)
-    func updateAssetGroup(_ name: String, newName: String, group: [String], in userSettings: UserSettings)
+    func updateAssetGroup(_ name: String, newName: String, newGroup: [String], in userSettings: UserSettings)
     func removeAssetGroup(_ name: String, from userSettings: UserSettings)
+    
 }
 
 struct ActualUserSettingsInteractor: UserSettingsInteractor {
@@ -34,7 +44,7 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
 
     // MARK: Initial Fetch
     
-    func fetchUserState() {
+    func fetchUserSettings() {
         let cancelBag = CancelBag()
         appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
         cloudKitRepository
@@ -97,32 +107,54 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
         update(userSettings, path: \.portfolio, isAccount: false, value: portfolio)
     }
         
-    func updateRebalanceTrigger(_ rebalanceTrigger: String, in userSettings: UserSettings) {
+    func updateRebalanceTrigger(_ rebalanceTrigger: RebalanceTrigger, in userSettings: UserSettings) {
         update(userSettings, path: \.portfolio.rebalanceTrigger, isAccount: false, value: rebalanceTrigger)
     }
-    
     
     func updateIsLive(_ isLive: Bool, in userSettings: UserSettings) {
         update(userSettings, path: \.portfolio.isLive, isAccount: false, value: isLive ? 1 : 0)
     }
     
     func addAssetGroup(_ group: [String], withName name: String, to userSettings: UserSettings) {
-        var assetGroups = userSettings.portfolio.assetGroups
-        assetGroups[name] = group
-        update(userSettings, path: \.portfolio.assetGroups, isAccount: false, value: assetGroups)
+        var portfolio = userSettings.portfolio
+        portfolio.assetGroups[name] = group
+        adjustTargetAllocation(&portfolio.targetAllocation, with: group, groupName: name)
+        update(userSettings, path: \.portfolio, isAccount: false, value: portfolio)
     }
     
-    func updateAssetGroup(_ name: String, newName: String, group: [String], in userSettings: UserSettings) {
-        var assetGroups = userSettings.portfolio.assetGroups
-        assetGroups.removeValue(forKey: name)
-        assetGroups[name] = group
-        update(userSettings, path: \.portfolio.assetGroups, isAccount: false, value: assetGroups)
+    func updateAssetGroup(_ name: String, newName: String, newGroup: [String], in userSettings: UserSettings) {
+        var portfolio = userSettings.portfolio
+        let group = portfolio.assetGroups.removeValue(forKey: name)
+        portfolio.assetGroups[newName] = newGroup
+        if let group = group {
+            let newTickers = newGroup.filter { !group.contains($0) }
+            if !newTickers.isEmpty || name != newName {
+                adjustTargetAllocation(&portfolio.targetAllocation, with: newTickers,
+                                       groupName: newName, oldName: name)
+            }
+        }
+        update(userSettings, path: \.portfolio, isAccount: false, value: portfolio)
+    }
+    
+    func adjustTargetAllocation(_ allocation: inout [String : Double], with newTickers: [String],
+                                groupName: String, oldName: String? = nil) {
+        var totalAllocation: Double = newTickers.compactMap {
+            allocation.removeValue(forKey: $0)
+        }.total
+        if let oldName = oldName, let previousAllocation = allocation.removeValue(forKey: oldName) {
+            totalAllocation += previousAllocation
+        }
+        allocation[groupName] = totalAllocation
     }
     
     func removeAssetGroup(_ name: String, from userSettings: UserSettings) {
-        var assetGroups = userSettings.portfolio.assetGroups
-        assetGroups.removeValue(forKey: name)
-        update(userSettings, path: \.portfolio.assetGroups, isAccount: false, value: assetGroups)
+        var portfolio = userSettings.portfolio
+        portfolio.assetGroups.removeValue(forKey: name)
+        if let _ = portfolio.targetAllocation[name] {
+            portfolio.targetAllocation = [:]
+            portfolio.isLive = 0
+        }
+        update(userSettings, path: \.portfolio, isAccount: false, value: portfolio)
     }
     
     // MARK: Update

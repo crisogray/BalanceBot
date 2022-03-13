@@ -46,15 +46,17 @@ extension AssetGroupsView {
             Section {
                 assetGroupRow()
             }
-            Section {
-                ForEach(Array(userSettings.portfolio.assetGroups.keys), id: \.self) { name in
-                    if name == removingGroup {
-                        loadingRow(name)
-                    } else {
-                        assetGroupRow(name: name, group: userSettings.portfolio.assetGroups[name])
-                            .swipeActions {
-                                Button("Remove", action: { remove(name) })
-                            }
+            if !userSettings.portfolio.assetGroups.isEmpty {
+                Section(header: Text("Your Asset Groups")) {
+                    ForEach(Array(userSettings.portfolio.assetGroups.keys), id: \.self) { name in
+                        if name == removingGroup {
+                            loadingRow(name)
+                        } else {
+                            assetGroupRow(name: name, group: userSettings.portfolio.assetGroups[name])
+                                .swipeActions {
+                                    Button("Remove", action: { remove(name) })
+                                }
+                        }
                     }
                 }
             }
@@ -92,7 +94,6 @@ extension AssetGroupsView {
             LoadingView()
         }
     }
-    
 
 }
                    
@@ -100,10 +101,10 @@ extension AssetGroupsView {
 
 extension AssetGroupsView {
     
-    func remove(_ group: String) {
-        removingGroup = group
+    func remove(_ assetGroup: String) {
+        removingGroup = assetGroup
         injection.userSettingsInteractor
-            .removeAssetGroup(group, from: userSettings)
+            .removeAssetGroup(assetGroup, from: userSettings)
     }
     
 }
