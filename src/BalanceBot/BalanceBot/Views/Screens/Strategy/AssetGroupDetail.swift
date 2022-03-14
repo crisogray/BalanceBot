@@ -73,8 +73,11 @@ extension AssetGroupDetailView {
             toggleTicker(ticker)
         } label: {
             HStack {
-                Text(ticker).foregroundColor(.white)
-                if group.contains(ticker) {
+                let selected = group.contains(ticker)
+                Text(ticker)
+                    .font(.headline)
+                    .foregroundColor(selected ? .white : .gray)
+                if selected {
                     Spacer()
                     Image(systemName: "checkmark.circle")
                 }

@@ -97,7 +97,7 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     
     func updateBalances(_ balances: BalanceList, in userSettings: UserSettings) {
         update(userSettings, path: \.portfolio.balances, isAccount: false,
-               value: balances.grouped(by: \.ticker).mapValues { $0.usdTotal })
+               value: balances.grouped(by: \.ticker).mapValues { $0.total(\.balance) })
     }
         
     func updateTargetAllocation(_ targetAllocation: [String : Double], in userSettings: UserSettings) {
@@ -138,9 +138,7 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     
     func adjustTargetAllocation(_ allocation: inout [String : Double], with newTickers: [String],
                                 groupName: String, oldName: String? = nil) {
-        var totalAllocation: Double = newTickers.compactMap {
-            allocation.removeValue(forKey: $0)
-        }.total
+        var totalAllocation: Double = newTickers.compactMap { allocation.removeValue(forKey: $0) }.total
         if let oldName = oldName, let previousAllocation = allocation.removeValue(forKey: oldName) {
             totalAllocation += previousAllocation
         }
@@ -163,6 +161,7 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
                    isAccount: Bool = true, value: T) {
         var settings = userSettings
         settings[keyPath: path] = value
+        
         let cancelBag = CancelBag()
         appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
         let record = isAccount ? settings.account.ckRecord : settings.portfolio.ckRecord

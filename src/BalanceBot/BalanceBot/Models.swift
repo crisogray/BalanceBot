@@ -52,14 +52,18 @@ struct ExchangeData: Equatable {
 typealias BalanceList = [Balance]
 
 extension BalanceList {
-    var usdTotal: Double { map { $0.usdValue }.total }
+    
+    func total(_ path: KeyPath<Balance, Double>) -> Double {
+        return map { $0[keyPath: path] }.total
+    }
+    
 }
 
 
 enum RebalanceTrigger: Hashable {
     
     enum CalendarSchedule: String, CaseIterable {
-        case monthly, quarterly, sixMonthly = "six-monthly", yearly
+        case weekly, monthly, quarterly, sixMonthly = "six-monthly", yearly
         
         var displayString: String {
             rawValue.capitalized
@@ -89,7 +93,8 @@ extension RebalanceTrigger {
     
     func isSameType(as other: RebalanceTrigger) -> Bool {
         switch (self, other) {
-        case (.calendar, .calendar), (.threshold, .threshold): return true
+        case (.calendar, .calendar),
+            (.threshold, .threshold): return true
         default: return false
         }
     }
@@ -105,10 +110,9 @@ extension Array where Element == Balance.ExchangeBalance {
         return compactMap { exchangeBalance in
             if exchangeBalance.ticker == "USD" {
                 return Balance(exchangeBalance)
-            } else if let price = prices.first(
-                where: { $0.ticker == exchangeBalance.ticker }) {
-                return Balance(exchangeBalance, price: price.price)
-            }
+            } else if let price = prices.first(where: {
+                $0.ticker == exchangeBalance.ticker
+            }) { return Balance(exchangeBalance, price: price.price) }
             return nil
         }
     }

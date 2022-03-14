@@ -23,13 +23,14 @@ struct StrategyView: View {
     @State var rebalanceTriggerDetail: RebalanceTrigger = .calendar(.monthly)
     @State var isLive = false
     
-
     // Loadings
     @State var isLoadingTargetAllocation = false
     @State var isLoadingIsLive = false
     @State var firstAppear = true
 
-    private var total: Double { Array(targetAllocation.values).total }
+    private var total: Double {
+        Array(targetAllocation.values).total
+    }
     
     var body: some View {
         NavigationView {
@@ -37,36 +38,11 @@ struct StrategyView: View {
                 .navigationTitle("Strategy")
                 .toolbar { closeToolbarItem }
                 .onReceive(userSettingsUpdate, perform: handleUserSettingsUpdate)
-                .onChange(of: isLive) { newValue in
-                    if (userSettings.portfolio.isLive != 0) != newValue {
-                        injection.userSettingsInteractor
-                            .updateIsLive(newValue, in: userSettings)
-                        isLoadingIsLive = true
-                    }
-                }
-                .onChange(of: rebalanceTrigger) { newValue in
-                    if !newValue.isSameType(as: rebalanceTriggerDetail) {
-                        rebalanceTriggerDetail = newValue
-                    }
-                }
-                .onChange(of: rebalanceTriggerDetail) { newValue in
-                    if userSettings.portfolio.rebalanceTrigger != newValue {
-                        injection.userSettingsInteractor
-                            .updateRebalanceTrigger(newValue, in: userSettings)
-                    }
-                }
+                .onChange(of: isLive, perform: isLiveUpdate)
+                .onChange(of: rebalanceTrigger, perform: rebalanceTriggerUpdate)
+                .onChange(of: rebalanceTriggerDetail, perform: rebalanceTriggerDetailUpdate)
         }
-        .onAppear {
-            if firstAppear {
-                targetAllocation = userSettings.portfolio.targetAllocation
-                rebalanceTriggerDetail = userSettings.portfolio.rebalanceTrigger
-                if case .calendar = userSettings.portfolio.rebalanceTrigger {
-                    rebalanceTrigger = .calendar(.monthly)
-                } else { rebalanceTrigger = .threshold(10) }
-                isLive = userSettings.portfolio.isLive != 0
-                firstAppear = false
-            }
-        }
+        .onAppear(perform: onAppear)
         .accentColor(tintColor)
     }
     
@@ -154,9 +130,8 @@ extension StrategyView {
             .font(.headline).padding()
             .background(Color(.secondarySystemGroupedBackground)) // (red: 53 / 255, green: 53 / 255, blue: 53 / 255))
             .cornerRadius(8)
-        }.disabled(total != 100 ||
-                   targetAllocation == userSettings.portfolio.targetAllocation ||
-                   isLoadingTargetAllocation)
+        }.disabled(targetAllocation == userSettings.portfolio.targetAllocation
+                   || total != 100 || isLoadingTargetAllocation)
     }
     
     var allocationPercentage:  some View {
@@ -239,6 +214,39 @@ extension StrategyView {
             targetAllocation = userSettings.portfolio.targetAllocation
         } else {
             userSettings = newSettings
+        }
+    }
+    
+    func onAppear() {
+        if firstAppear {
+            targetAllocation = userSettings.portfolio.targetAllocation
+            rebalanceTriggerDetail = userSettings.portfolio.rebalanceTrigger
+            if case .calendar = userSettings.portfolio.rebalanceTrigger {
+                rebalanceTrigger = .calendar(.monthly)
+            } else { rebalanceTrigger = .threshold(10) }
+            isLive = userSettings.portfolio.isLive != 0
+            firstAppear = false
+        }
+    }
+    
+    func isLiveUpdate(_ newValue: Bool) {
+        if (userSettings.portfolio.isLive != 0) != newValue {
+            injection.userSettingsInteractor
+                .updateIsLive(newValue, in: userSettings)
+            isLoadingIsLive = true
+        }
+    }
+    
+    func rebalanceTriggerUpdate(_ newValue: RebalanceTrigger) {
+        if !newValue.isSameType(as: rebalanceTriggerDetail) {
+            rebalanceTriggerDetail = newValue
+        }
+    }
+    
+    func rebalanceTriggerDetailUpdate(_ newValue: RebalanceTrigger) {
+        if userSettings.portfolio.rebalanceTrigger != newValue {
+            injection.userSettingsInteractor
+                .updateRebalanceTrigger(newValue, in: userSettings)
         }
     }
     

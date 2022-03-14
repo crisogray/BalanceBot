@@ -10,7 +10,10 @@ import Combine
 
 // MARK: ZipMany
 
+
 extension Publishers {
+    
+    /// Source: https://stackoverflow.com/questions/60345806/how-to-zip-more-than-4-publishers
     struct ZipMany<Element, F: Error>: Publisher {
         typealias Output = [Element]
         typealias Failure = F
@@ -75,18 +78,6 @@ extension String {
     
 }
 
-// MARK: Target Allocation
-
-func adjustTargetAllocation(_ allocation: [String : Double], with newTickers: [String],
-                            groupName: String) -> [String : Double] {
-    var allocation = allocation
-    let totalAllocation: [Double] = newTickers.compactMap {
-        allocation.removeValue(forKey: $0)
-    }
-    allocation[groupName] = totalAllocation.total
-    return allocation
-}
-
 // MARK: Array and Dictionary
 
 extension Array where Element: Equatable {
@@ -123,7 +114,7 @@ extension Sequence where Element: Hashable {
 }
 
 extension Dictionary where Value == BalanceList {
-    var sortedKeys: [Key] { keys.sorted { self[$0]!.usdTotal > self[$1]!.usdTotal } }
+    var sortedKeys: [Key] { keys.sorted { self[$0]!.total(\.usdValue) > self[$1]!.total(\.usdValue) } }
 }
 
 extension Sequence where Element == String {
