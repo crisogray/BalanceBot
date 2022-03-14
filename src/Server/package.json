@@ -9,6 +9,7 @@
   "author": "BCG814",
   "license": "ISC",
   "dependencies": {
+    "coingecko-api": "^1.0.10",
     "node-fetch": "^2.6.7"
   }
 }
