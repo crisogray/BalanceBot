@@ -91,6 +91,7 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
             $0.key != exchange.rawValue
         }
         update(userSettings, path: \.account.connectedExchanges, value: connectedExchanges)
+        updateTargetAllocation([:], in: userSettings)
     }
     
     // MARK: Portfolio

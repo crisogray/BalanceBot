@@ -203,8 +203,7 @@ async function calculateRebalances() {
     for (const record of records) {
         if (needsRebalance(record, prices)) {
             println("Needs Rebalance", record.name)
-            const response = await sendNotification(record);
-            println("Response", response);
+            await sendNotification(record);
         }
     }
     process.exit()
