@@ -37,6 +37,7 @@
 		B5B4ADAD27AC0BF0008921AC /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */; };
 		B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADAE27AC0DEF008921AC /* AppState.swift */; };
 		B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADB027AC0F53008921AC /* UserSettingsInteractor.swift */; };
+		B5C7D7DB27E0F6290086B0A0 /* UserPermissionsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C7D7D827E0F6290086B0A0 /* UserPermissionsInteractor.swift */; };
 		B5DDC4BC27AD47B300777389 /* ExchangesInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DDC4BB27AD47B300777389 /* ExchangesInteractor.swift */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 		B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		B5B4ADAE27AC0DEF008921AC /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		B5B4ADB027AC0F53008921AC /* UserSettingsInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSettingsInteractor.swift; sourceTree = "<group>"; };
+		B5C7D7D827E0F6290086B0A0 /* UserPermissionsInteractor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserPermissionsInteractor.swift; sourceTree = "<group>"; };
 		B5DDC4BB27AD47B300777389 /* ExchangesInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangesInteractor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -111,9 +113,8 @@
 		B563E44227AEDE8200E7CA83 /* Clean Architecture */ = {
 			isa = PBXGroup;
 			children = (
-				B563E43D27AEC31C00E7CA83 /* CancelBag.swift */,
-				B563E43B27AEC31C00E7CA83 /* Loadable.swift */,
-				B563E43C27AEC31C00E7CA83 /* Store.swift */,
+				B5C7D7D827E0F6290086B0A0 /* UserPermissionsInteractor.swift */,
+				B5C7D7DE27E10BBB0086B0A0 /* Helpers */,
 			);
 			path = "Clean Architecture";
 			sourceTree = "<group>";
@@ -227,6 +228,16 @@
 			path = Repositories;
 			sourceTree = "<group>";
 		};
+		B5C7D7DE27E10BBB0086B0A0 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				B563E43D27AEC31C00E7CA83 /* CancelBag.swift */,
+				B563E43B27AEC31C00E7CA83 /* Loadable.swift */,
+				B563E43C27AEC31C00E7CA83 /* Store.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 		B5DDC4BA27AD425500777389 /* Interactors */ = {
 			isa = PBXGroup;
 			children = (
@@ -325,6 +336,7 @@
 				B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */,
 				B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */,
 				B5A51D3A27D8E4E2006E7DF9 /* Helpers.swift in Sources */,
+				B5C7D7DB27E0F6290086B0A0 /* UserPermissionsInteractor.swift in Sources */,
 				B5B4ADA727AC09F9008921AC /* CloudKitRepository.swift in Sources */,
 				B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */,
 				B579042527BC115A0038AB83 /* ExchangeRepository.swift in Sources */,

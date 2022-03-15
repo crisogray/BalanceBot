@@ -97,7 +97,7 @@ async function idsForSymbols(tickers) {
         const symbol = currency.symbol.toUpperCase()
         const currentId = symbolIds[symbol]
         if (currentId && currency.id.length > currentId.length) 
-            return;
+            continue;
         symbolIds[symbol] = currency.id
     }
     return symbolIds
@@ -196,8 +196,7 @@ async function calculateRebalances() {
     await container.setUpAuth()
     let records = await livePortfolios()
     records = records.filter(r => !isCalendar(r.rebalanceTrigger));
-    if (records.length == 0) 
-        return;
+    if (records.length == 0) return;
     const tickers = aggregateTickers(records);
     const prices = await getPrices(tickers);
     for (const record of records) {

@@ -72,10 +72,25 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     
     func createUserSettings(_ id: String) -> AnyPublisher<(CKRecord, CKRecord), Error> {
         let account = Account.new(id), portfolio = Portfolio.new(account.portfolioId)
+        
         return Publishers.Zip(
             cloudKitRepository.saveRecord(account.ckRecord, in: .priv),
             cloudKitRepository.saveRecord(portfolio.ckRecord, in: .pub)
-        ).eraseToAnyPublisher()
+        ).flatMap { userSettings -> AnyPublisher<(CKRecord, CKRecord), Error> in
+            print(userSettings.1)
+            return cloudKitRepository.subscribeToNotifications(for: portfolio.id)
+                .flatMap { _ -> Result<(CKRecord, CKRecord), Error>.Publisher in
+                    return Result.Publisher(.success(userSettings))
+                }.eraseToAnyPublisher()
+        }.eraseToAnyPublisher()
+        
+        /*return cloudKitRepository.subscribeToNotifications(for: portfolio.id)
+            .flatMap { _ in
+                Publishers.Zip(
+                    cloudKitRepository.saveRecord(account.ckRecord, in: .priv),
+                    cloudKitRepository.saveRecord(portfolio.ckRecord, in: .pub)
+                )
+            }.eraseToAnyPublisher()*/
     }
     
     // MARK: API Keys

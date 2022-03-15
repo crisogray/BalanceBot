@@ -12,10 +12,19 @@ struct ContentView: View {
     
     @Environment(\.injection) private var injection: Injection
     @State var userSettings: Loadable<UserSettings> = .notRequested
+    @State var permissionsStatus: Permission.Status = .unknown
     
     var body: some View {
-        content
+        permissionsGate
             .onReceive(userSettingsUpdate) { userSettings = $0 }
+            .onReceive(permissionsUpdate) { permissionsStatus = $0 }
+    }
+    
+    var permissionsGate: AnyView {
+        switch permissionsStatus {
+        case .unknown, .notRequested: return AnyView(permissionsView)
+        default: return content
+        }
     }
     
     var content: AnyView {
@@ -34,7 +43,20 @@ struct ContentView: View {
 extension ContentView {
     
     var notRequestedView: some View {
-        Text("").onAppear { injection.userSettingsInteractor.fetchUserSettings() }
+        Text("").onAppear {
+            injection.userSettingsInteractor.fetchUserSettings()
+        }
+    }
+    
+    var permissionsView: some View {
+        Text("")
+            .onAppear {
+                injection.userPermissionsInteractor.fetchPushNotificationsPermissionStatus()
+            }.onChange(of: permissionsStatus) { newValue in
+                if newValue == .notRequested {
+                    injection.userPermissionsInteractor.requestPushNotificationsPermission()
+                }
+            }
     }
     
     var loadingView: some View {
@@ -54,5 +76,9 @@ extension ContentView {
 extension ContentView {
     var userSettingsUpdate: AnyPublisher<Loadable<UserSettings>, Never> {
         injection.appState.updates(for: \.userSettings)
+    }
+    
+    var permissionsUpdate: AnyPublisher<Permission.Status, Never> {
+        injection.appState.updates(for: \.permissions.push)
     }
 }

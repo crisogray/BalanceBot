@@ -96,6 +96,7 @@ extension APIKeyEntryView {
         self.key = key
         self.secret = secret
         qrInput = false
+        submit()
     }
     
     func submit() {

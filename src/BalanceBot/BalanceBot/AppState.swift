@@ -11,12 +11,20 @@ class AppState: Equatable {
     
     var userSettings: Loadable<UserSettings> = .notRequested
     var exchangeData: Loadable<ExchangeData> = .notRequested
+    var permissions = Permissions()
     var routing = Routing()
+    
+}
+
+extension AppState {
     
     struct Routing: Equatable {
         var dashboard = DashboardView.Routing()
     }
     
+    struct Permissions: Equatable {
+        var push: Permission.Status = .unknown
+    }
 }
 
 func == (lhs: AppState, rhs: AppState) -> Bool {
