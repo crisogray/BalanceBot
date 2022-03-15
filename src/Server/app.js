@@ -1,5 +1,7 @@
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
+const { v1: uuidv1 } = require('uuid');
+
 var node_fetch = require('node-fetch');
 
 var CloudKit = require('./cloudkit/cloudkit');
@@ -7,6 +9,17 @@ var containerConfig = require('./cloudkit/config');
 
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
+
+CloudKit.configure({
+    services: {
+        fetch: node_fetch,
+        logger: console
+    },
+    containers: [containerConfig]
+});
+
+var container = CloudKit.getDefaultContainer();
+var database = container.publicCloudDatabase;
 
 function println(key, value) {
     console.log("--> " + key + ":");
@@ -45,8 +58,7 @@ function convertToRecord(record) {
 
 function addingUnique(newValues, existing) {
     var working = existing;
-    for (i in newValues) {
-        const value = newValues[i];
+    for (const value of newValues) {
         if (!working.includes(value)) {
             working.push(value)
         }
@@ -57,8 +69,7 @@ function addingUnique(newValues, existing) {
 function tickersNeeded(portfolio) {
     var balances = Object.keys(portfolio.balances);
     var targetTickers = Object.keys(portfolio.targetAllocation);
-    for (i in targetTickers) {
-        const ticker = targetTickers[i];
+    for (const ticker of targetTickers) {
         var tickers = [ticker]
         if (ticker in portfolio.assetGroups) 
             tickers = portfolio.assetGroups[ticker];
@@ -71,9 +82,8 @@ function tickersNeeded(portfolio) {
 
 function aggregateTickers(records) {
     var tickers = []
-    records.forEach(element => { 
-        tickers = addingUnique(tickersNeeded(element), tickers)
-    });
+    for (const record of records)
+        tickers = addingUnique(tickersNeeded(record), tickers)
     return tickers
 }
 
@@ -83,13 +93,13 @@ async function idsForSymbols(tickers) {
         return tickers.includes(obj.symbol.toUpperCase());
     });
     let symbolIds = {}
-    currencies.forEach(function (currency) { 
+    for (const currency of currencies) {
         const symbol = currency.symbol.toUpperCase()
         const currentId = symbolIds[symbol]
         if (currentId && currency.id.length > currentId.length) 
             return;
         symbolIds[symbol] = currency.id
-    });
+    }
     return symbolIds
 }
 
@@ -100,9 +110,8 @@ async function getPrices(tickers) {
         ids: symbols, vs_currencies: "usd"
     });
     var symbolPrices = {USD : 1};
-    tickers.forEach(ticker => {
+    for (const ticker of tickers) 
         symbolPrices[ticker] = prices.data[symbolIds[ticker]].usd;
-    });
     return symbolPrices
 }
 
@@ -120,14 +129,14 @@ function schedule(rebalanceTrigger) {
 
 function groupBalances(balances, assetGroups) {
     let groupedBalances = balances;
-    Object.keys(assetGroups).forEach(groupName => {
+    for (const groupName of Object.keys(assetGroups)) {
         var total = 0.0;
-        assetGroups[groupName].forEach(ticker => {
+        for (const ticker of assetGroups[groupName]) {
             total += groupedBalances[ticker];
             delete groupedBalances[ticker];
-        });
+        }
         groupedBalances[groupName] = total;
-    });
+    }
     return groupedBalances
 }
 
@@ -142,15 +151,15 @@ function balancesToPercentages(balances) {
 
 function currentAllocation(portfolio, prices) {
     let usdBalances = {};
-    Object.keys(portfolio.balances).forEach(ticker => {
+    for (const ticker of Object.keys(portfolio.balances)) {
         usdBalances[ticker] = portfolio.balances[ticker] * prices[ticker];
-    });
+    }
     let assetGroups = {};
-    Object.keys(portfolio.assetGroups).forEach(groupName => {
+    for (const groupName of Object.keys(portfolio.assetGroups)) {
         if (groupName in portfolio.targetAllocation) {
             assetGroups[groupName] = portfolio.assetGroups[groupName]
         }
-    });
+    }
     let groupedBalances = groupBalances(usdBalances, assetGroups);
     Object.keys(portfolio.targetAllocation).filter(x => {
         return !Object.keys(groupedBalances).includes(x)
@@ -167,31 +176,40 @@ function needsRebalance(portfolio, prices) {
     return diffs.includes(true);
 }
 
-CloudKit.configure({
-    services: {
-        fetch: node_fetch,
-        logger: console
-    },
-    containers: [containerConfig]
-});
+function notificationRecord(portfolioId) {
+    return {
+        recordType: "Notification",
+        recordName: uuidv1(),
+        fields: {
+            portfolio: { value: portfolioId },
+            note: { value: "A test notification" },
+            read: { value: 0 }
+        }
+    };
+}
 
-var container = CloudKit.getDefaultContainer();
-var database = container.publicCloudDatabase;
+function sendNotification(portfolio) {
+    return database.saveRecords(notificationRecord(portfolio.name))
+}
 
 async function calculateRebalances() {
     await container.setUpAuth()
-    const records = await livePortfolios()
+    let records = await livePortfolios()
+    records = records.filter(r => !isCalendar(r.rebalanceTrigger));
+    if (records.length == 0) 
+        return;
     const tickers = aggregateTickers(records);
     const prices = await getPrices(tickers);
-    records.forEach(record => {
+    for (const record of records) {
         if (needsRebalance(record, prices)) {
             println("Needs Rebalance", record.name)
+            const response = await sendNotification(record);
+            println("Response", response);
         }
-    });
+    }
     process.exit()
 }
 
 calculateRebalances()
-
 
 
