@@ -29,10 +29,8 @@ struct DashboardView: View {
                 }
             }
             .onReceive(routingUpdate) { routingState = $0 }
-            .fullScreenCover(isPresented: routingBinding.apiKeysModal,
-                             content: { apiKeyView })
-            .fullScreenCover(isPresented: routingBinding.portfolioSettingsModal,
-                             content: { portfolioSettingsView })
+            .fullScreenCover(isPresented: routingBinding.apiKeys, content: { apiKeyView })
+            .fullScreenCover(isPresented: routingBinding.strategy, content: { strategyView })
     }
     
     var content: AnyView {
@@ -65,7 +63,7 @@ extension DashboardView {
                 Spacer()
                 dashboardButton(image: "slider.horizontal.3",
                                 label: "Strategy",
-                                action: showPortfolioSettings)
+                                action: showStrategy)
                     .disabled(exchangeData.value == nil)
                 Spacer()
                 dashboardButton(image: "key",
@@ -88,12 +86,12 @@ extension DashboardView {
     
     var apiKeyView: some View {
         APIKeysView(userSettings: userSettings,
-                   isDisplayed: routingBinding.apiKeysModal)
+                   isDisplayed: routingBinding.apiKeys)
             .environment(\.injection, injection)
     }
     
-    var portfolioSettingsView: some View {
-        StrategyView(isDisplayed: routingBinding.portfolioSettingsModal,
+    var strategyView: some View {
+        StrategyView(isDisplayed: routingBinding.strategy,
                      userSettings: userSettings, exchangeData: exchangeData.loadedValue)
             .environment(\.injection, injection)
     }
@@ -139,11 +137,11 @@ extension DashboardView {
 extension DashboardView {
     
     func showAPIKeys() {
-        injection.appState[\.routing.dashboard.apiKeysModal] = true
+        injection.appState[\.routing.dashboard.apiKeys] = true
     }
     
-    func showPortfolioSettings() {
-        injection.appState[\.routing.dashboard.portfolioSettingsModal] = true
+    func showStrategy() {
+        injection.appState[\.routing.dashboard.strategy] = true
     }
     
 }
@@ -153,8 +151,8 @@ extension DashboardView {
 extension DashboardView {
     
     struct Routing: Equatable {
-        var apiKeysModal = false
-        var portfolioSettingsModal = false
+        var apiKeys = false
+        var strategy = false
     }
     
 }

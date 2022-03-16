@@ -28,7 +28,7 @@ struct ActualCloudKitRepository: CloudKitRepository {
     var cancellables = Set<AnyCancellable>()
     
     private func notificationPredicate(_ portfolioId: String) -> NSPredicate {
-        NSPredicate(format: "portfolio == %@ AND read = 0", portfolioId)
+        NSPredicate(format: "portfolio == %@", portfolioId)
     }
     
     func subscribeToNotifications(for portfolioId: String) -> AnyPublisher<CKSubscription, Error> {
@@ -89,12 +89,7 @@ struct ActualCloudKitRepository: CloudKitRepository {
     func deleteRecords(_ records: [CKRecord.ID], from database: CloudKitDatabase) -> AnyPublisher<[CKRecord.ID], Error> {
         resultErrorCallbackPublisher { completion in
             let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: records)
-            operation.modifyRecordsResultBlock = { result in
-                switch result {
-                case .success(_): completion(records, nil)
-                case .failure(let error): completion(nil, error)
-                }
-            }
+            operation.modifyRecordsResultBlock = operationResultBlock(records, completion: completion)
             database.database(container).add(operation)
         }
     }
@@ -103,13 +98,17 @@ struct ActualCloudKitRepository: CloudKitRepository {
         resultErrorCallbackPublisher { completion in
             let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
             operation.savePolicy = .changedKeys
-            operation.modifyRecordsResultBlock = { result in
-                switch result {
-                case .success(_): completion(record, nil)
-                case .failure(let error): completion(nil, error)
-                }
-            }
+            operation.modifyRecordsResultBlock = operationResultBlock(record, completion: completion)
             database.database(container).add(operation)
+        }
+    }
+    
+    private func operationResultBlock<T>(_ input: T, completion: @escaping (T?, Error?) -> Void) -> ((Result<Void, Error>) -> Void) {
+        { result in
+            switch result {
+            case .success(_): completion(input, nil)
+            case .failure(let error): completion(nil, error)
+            }
         }
     }
     
