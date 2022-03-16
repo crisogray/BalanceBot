@@ -15,7 +15,10 @@ protocol CloudKitRepository {
     func fetchRecord(from database: CloudKitDatabase, withId id: CKRecord.ID) -> AnyPublisher<CKRecord, Error>
     func saveRecord(_ record: CKRecord, in database: CloudKitDatabase) -> AnyPublisher<CKRecord, Error>
     func updateRecord(_ record: CKRecord, in database: CloudKitDatabase) -> AnyPublisher<CKRecord, Error>
+    func deleteRecords(_ records: [CKRecord.ID], from database: CloudKitDatabase) -> AnyPublisher<[CKRecord.ID], Error>
     func subscribeToNotifications(for portfolioId: String) -> AnyPublisher<CKSubscription, Error>
+    func hasNotifications(for portfolioId: String) -> AnyPublisher<Bool, Error>
+    func fetchNotifications(for portfolioId: String) -> AnyPublisher<[CKRecord], Error>
 }
 
 struct ActualCloudKitRepository: CloudKitRepository {
@@ -24,11 +27,14 @@ struct ActualCloudKitRepository: CloudKitRepository {
     
     var cancellables = Set<AnyCancellable>()
     
+    private func notificationPredicate(_ portfolioId: String) -> NSPredicate {
+        NSPredicate(format: "portfolio == %@ AND read = 0", portfolioId)
+    }
+    
     func subscribeToNotifications(for portfolioId: String) -> AnyPublisher<CKSubscription, Error> {
         resultErrorCallbackPublisher { completion in
-            let predicate = NSPredicate(format: "portfolio == %@", portfolioId)
             let subscription = CKQuerySubscription(recordType: "Notification",
-                                                   predicate: predicate,
+                                                   predicate: notificationPredicate(portfolioId),
                                                    options: .firesOnRecordCreation)
             let notification = CKSubscription.NotificationInfo()
             notification.title = "Portfolio Alert"
@@ -37,6 +43,23 @@ struct ActualCloudKitRepository: CloudKitRepository {
             subscription.notificationInfo = notification
             CloudKitDatabase.pub.database(container).save(subscription, completionHandler: completion)
         }
+    }
+    
+    func fetchNotifications(for portfolioId: String) -> AnyPublisher<[CKRecord], Error> {
+        let query = CKQuery(recordType: "Notification", predicate: notificationPredicate(portfolioId))
+        /*return Future<[CKRecord], Error> {
+            try await CloudKitDatabase.pub.database(container)
+                .records(matching: query, inZoneWith: .default)
+        }.eraseToAnyPublisher()*/
+        return resultErrorCallbackPublisher { completion in
+            CloudKitDatabase.pub.database(container)
+                .perform(query, inZoneWith: .default, completionHandler: completion)
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func hasNotifications(for portfolioId: String) -> AnyPublisher<Bool, Error> {
+        fetchNotifications(for: portfolioId).map { $0.isEmpty }.eraseToAnyPublisher()
     }
     
     func fetchCurrentUserID() -> AnyPublisher<CKRecord.ID, Error> {
@@ -60,6 +83,19 @@ struct ActualCloudKitRepository: CloudKitRepository {
     func deleteRecord(_ record: CKRecord.ID, from database: CloudKitDatabase) -> AnyPublisher<CKRecord.ID, Error> {
         resultErrorCallbackPublisher { completion in
             database.database(container).delete(withRecordID: record, completionHandler: completion)
+        }
+    }
+    
+    func deleteRecords(_ records: [CKRecord.ID], from database: CloudKitDatabase) -> AnyPublisher<[CKRecord.ID], Error> {
+        resultErrorCallbackPublisher { completion in
+            let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: records)
+            operation.modifyRecordsResultBlock = { result in
+                switch result {
+                case .success(_): completion(records, nil)
+                case .failure(let error): completion(nil, error)
+                }
+            }
+            database.database(container).add(operation)
         }
     }
     

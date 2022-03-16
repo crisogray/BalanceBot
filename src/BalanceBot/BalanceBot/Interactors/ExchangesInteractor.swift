@@ -5,6 +5,7 @@
 //  Created by Ben Gray on 04/02/2022.
 //
 
+import Foundation
 import Combine
 
 protocol ExchangesInteractor {
@@ -39,7 +40,9 @@ struct RealExchangesInteractor: ExchangesInteractor {
                     .filter { allowedTickers.contains($0.ticker) }
                 tickers.addUnique(contentsOf: balances.map { Ticker([$0.ticker, $0.exchange])! } )
                 return Just((balances, tickers)).setFailureType(to: Error.self).eraseToAnyPublisher()
-            }.eraseToAnyPublisher()
+            }
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
     
     // MARK: Request Balances

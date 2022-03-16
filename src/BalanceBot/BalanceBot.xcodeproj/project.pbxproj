@@ -33,7 +33,6 @@
 		B5B4AD9A27AAE807008921AC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */; };
 		B5B4ADA527ABEC56008921AC /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADA427ABEC56008921AC /* Models.swift */; };
 		B5B4ADA727AC09F9008921AC /* CloudKitRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */; };
-		B5B4ADA927AC0A02008921AC /* KeychainRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */; };
 		B5B4ADAD27AC0BF0008921AC /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */; };
 		B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADAE27AC0DEF008921AC /* AppState.swift */; };
 		B5B4ADB127AC0F53008921AC /* UserSettingsInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5B4ADB027AC0F53008921AC /* UserSettingsInteractor.swift */; };
@@ -66,7 +65,6 @@
 		B5B4AD9927AAE807008921AC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B5B4ADA427ABEC56008921AC /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitRepository.swift; sourceTree = "<group>"; };
-		B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainRepository.swift; sourceTree = "<group>"; };
 		B5B4ADAA27AC0BEC008921AC /* BalanceBot.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BalanceBot.entitlements; sourceTree = "<group>"; };
 		B5B4ADAC27AC0BF0008921AC /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		B5B4ADAE27AC0DEF008921AC /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -222,7 +220,6 @@
 			isa = PBXGroup;
 			children = (
 				B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */,
-				B5B4ADA827AC0A02008921AC /* KeychainRepository.swift */,
 				B579042427BC115A0038AB83 /* ExchangeRepository.swift */,
 			);
 			path = Repositories;
@@ -328,7 +325,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B55E857527B4032A006D24C8 /* APIKeyEntry.swift in Sources */,
-				B5B4ADA927AC0A02008921AC /* KeychainRepository.swift in Sources */,
 				B5B4AD9527AAE806008921AC /* Content.swift in Sources */,
 				B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */,
 				B5A51D3D27D8FAD5006E7DF9 /* Strategy.swift in Sources */,

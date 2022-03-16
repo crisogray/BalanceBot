@@ -64,15 +64,16 @@ extension Portfolio {
     
 }
 
-extension Publisher where Output == (CKRecord, CKRecord) {
+extension Publisher where Output == ((CKRecord, CKRecord), Bool) {
     
     func sinkToUserSettings(_ sendUserSettings: @escaping (Loadable<UserSettings>) -> Void) -> AnyCancellable {
         return sink { completion in
             guard case .failure(let error) = completion else { return }
             sendUserSettings(.failed(error))
         } receiveValue: { value in
-            sendUserSettings(.loaded(UserSettings(account: Account.fromCKRecord(value.0),
-                                                  portfolio: Portfolio.fromCKRecord(value.1))))
+            sendUserSettings(.loaded(UserSettings(account: Account.fromCKRecord(value.0.0),
+                                                  portfolio: Portfolio.fromCKRecord(value.0.1),
+                                                  hasNotifications: value.1)))
         }
     }
     

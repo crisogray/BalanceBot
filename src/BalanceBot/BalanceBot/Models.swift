@@ -26,6 +26,7 @@ struct Portfolio: Equatable {
 struct UserSettings: Equatable {
     var account: Account
     var portfolio: Portfolio
+    var hasNotifications: Bool
 }
 
 struct Balance: Equatable {

@@ -31,14 +31,11 @@ protocol UserSettingsInteractor {
 struct ActualUserSettingsInteractor: UserSettingsInteractor {
     
     let cloudKitRepository: CloudKitRepository
-    let keychainRepository: KeychainRepository
     let appState: Store<AppState>
     
     init(cloudKitRepository: CloudKitRepository,
-         keychainRepository: KeychainRepository,
          appState: Store<AppState>) {
         self.cloudKitRepository = cloudKitRepository
-        self.keychainRepository = keychainRepository
         self.appState = appState
     }
 
@@ -53,6 +50,11 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
             .flatMap { userId in
                 getUserSettings(userId)
                     .catch { _ in createUserSettings(userId) }
+            }.flatMap { userSettings in
+                Publishers.Zip(
+                    Result.Publisher(.success(userSettings)),
+                    cloudKitRepository.hasNotifications(for: userSettings.1.recordID.recordName)
+                ).eraseToAnyPublisher()
             }.sinkToUserSettings {
                 appState[\.userSettings] = $0
             }.store(in: cancelBag)
@@ -72,15 +74,14 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     
     func createUserSettings(_ id: String) -> AnyPublisher<(CKRecord, CKRecord), Error> {
         let account = Account.new(id), portfolio = Portfolio.new(account.portfolioId)
-        
         return Publishers.Zip(
             cloudKitRepository.saveRecord(account.ckRecord, in: .priv),
             cloudKitRepository.saveRecord(portfolio.ckRecord, in: .pub)
-        ).flatMap { userSettings -> AnyPublisher<(CKRecord, CKRecord), Error> in
-            print(userSettings.1)
-            return cloudKitRepository.subscribeToNotifications(for: portfolio.id)
+        ).flatMap { userSettings in
+            cloudKitRepository
+                .subscribeToNotifications(for: portfolio.id)
                 .flatMap { _ -> Result<(CKRecord, CKRecord), Error>.Publisher in
-                    return Result.Publisher(.success(userSettings))
+                    Result.Publisher(.success(userSettings))
                 }.eraseToAnyPublisher()
         }.eraseToAnyPublisher()
         
@@ -91,6 +92,30 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
                     cloudKitRepository.saveRecord(portfolio.ckRecord, in: .pub)
                 )
             }.eraseToAnyPublisher()*/
+    }
+    
+    // MARK: Notifications
+    
+    func clearNotifications(for userSettings: UserSettings) {
+        guard userSettings.hasNotifications else {
+            return
+        }
+        let cancelBag = CancelBag()
+        appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
+        cloudKitRepository
+            .fetchNotifications(for: userSettings.portfolio.id)
+            .flatMap { records in
+                cloudKitRepository.deleteRecords(records.map(\.recordID), from: .pub)
+            }.sink(receiveCompletion: { _ in
+                appState[\.userSettings].cancelLoading()
+            }) { _ in
+                if case var .loaded(userSettings) = appState[\.userSettings] {
+                    userSettings.hasNotifications = false
+                    appState[\.userSettings] = .loaded(userSettings)
+                }
+            }.store(in: cancelBag)
+
+
     }
     
     // MARK: API Keys
