@@ -24,7 +24,9 @@ struct DashboardView: View {
             .onReceive(exchangeUpdate) {
                 exchangeData = $0
                 if case let .loaded(exchangeData) = $0 {
-                    injection.userSettingsInteractor.updateBalances(exchangeData.balances, in: userSettings)
+                    injection.userSettingsInteractor
+                        .updateBalances(exchangeData.balances,
+                                        in: userSettings)
                 }
             }
             .onReceive(routingUpdate) { routingState = $0 }
