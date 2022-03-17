@@ -102,8 +102,8 @@ extension Exchange {
     // if complete request: ticker, balance, usdValue, exchange
     var balancesSchema: JSONDecodeSchema {
         switch self {
-        case .bitfinex:
-            return .repeatUnit([.value(1), .value(2)], fixed: [self], conditions: [(.value(0), "exchange")])
+        case .bitfinex: return .repeatUnit([.value(1), .value(2)], fixed: [self],
+                                           conditions: [(.value(0), "exchange")])
         case .kraken: return .unwrap("result", .repeatUnit([.key, .value(nil)], fixed: [self]))
         case .coinbase: return .unwrap("data", .repeatUnit([.unwrap("balance", .value("currency")),
                                                             .unwrap("balance", .value("amount"))], fixed: [self]))

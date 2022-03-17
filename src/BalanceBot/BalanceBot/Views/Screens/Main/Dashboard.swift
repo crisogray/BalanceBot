@@ -47,18 +47,17 @@ extension DashboardView {
     var mainContent: AnyView {
         switch exchangeData {
         case .notRequested: return AnyView(notRequestedView)
-        case .isLoading(last: let last, cancelBag: _) where last != nil:
-            return AnyView(balancesView(last!))
+        case let .isLoading(last: last, cancelBag: _) where last != nil:
+            return AnyView(loadedView(userSettings, last!))
         case .isLoading: return AnyView(loadingView)
         case let .failed(error): return AnyView(Text(error.localizedDescription))
-        case let .loaded(exchangeData): return AnyView(balancesView(exchangeData))
+        case let .loaded(exchangeData): return AnyView(loadedView(userSettings, exchangeData))
         }
     }
     
     func containerStack(_ content: AnyView) -> some View {
         VStack {
-            content
-                .frame(maxHeight: .infinity)
+            content.frame(maxHeight: .infinity)
             HStack {
                 Spacer()
                 dashboardButton(image: "slider.horizontal.3",
@@ -111,8 +110,14 @@ extension DashboardView {
         }
     }
     
-    func balancesView(_ exchangeData: ExchangeData) -> some View {
-        BalancesView(exchangeData: exchangeData)
+    func loadedView(_ userSettings: UserSettings, _ exchangeData: ExchangeData) -> some View {
+        VStack {
+            BalancesView(exchangeData: exchangeData)
+            Button("Calculate Rebalance") {
+                injection.exchangesInteractor.calculateRebalance(for: userSettings, with: exchangeData)
+            }
+            Spacer()
+        }
     }
     
     func dashboardButton(image: String, label: String, action: @escaping () -> Void) -> some View {

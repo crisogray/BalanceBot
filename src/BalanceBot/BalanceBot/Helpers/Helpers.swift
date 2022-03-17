@@ -55,8 +55,8 @@ extension Double {
     
 }
 
-extension Array where Element == Double {
-    var total: Double { reduce(0, +)}
+extension Sequence where Element == Double {
+    var total: Double { reduce(0, +) }
 }
 
 // MARK: Equatable

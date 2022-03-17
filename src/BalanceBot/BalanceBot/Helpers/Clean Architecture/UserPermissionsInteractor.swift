@@ -39,7 +39,6 @@ struct ActualUserPermissionsInteractor: UserPermissionsInteractor {
     }
     
     func fetchPushNotificationsPermissionStatus() {
-        print("Here")
         let center = UNUserNotificationCenter.current()
         center.getNotificationSettings { settings in
             DispatchQueue.main.async {
