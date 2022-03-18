@@ -87,36 +87,180 @@ struct RealExchangesInteractor: ExchangesInteractor {
         
         var ignoredDelta: Double = 0
         for ticker in currentTickers.union(targetTickers) {
-            let delta = (targetAllocation[ticker] ?? 0) - (currentAllocation[ticker] ?? 0)
+            let delta = (targetAllocation[ticker] ?? 0) -
+                        (currentAllocation[ticker] ?? 0)
             if delta < 1 && delta > -1 {
                 ignoredDelta += abs(delta)
-            } else {
-                if let group = userSettings.portfolio.assetGroups[ticker] {
-                    let balances = exchangeData.balances.filter {
-                        group.contains($0.ticker)
-                    }.grouped(by: \.ticker)
-                    deltasForGroup(group, balances: balances, delta: total * delta / 100).forEach {
-                        deltas[$0] = $1
-                    }
-                } else if ticker != "USD" {
-                    deltas[ticker] = total * delta / 100
-                }
+            } else if let group = userSettings.portfolio.assetGroups[ticker] {
+                let balances = exchangeData.balances
+                    .filter { group.contains($0.ticker) }
+                    .grouped(by: \.ticker)
+                deltasForGroup(group, balances: balances, delta: total * delta / 100)
+                    .forEach { deltas[$0] = $1 }
+            } else if ticker != "USD" {
+                deltas[ticker] = total * delta / 100
             }
         }
         deltas = deltas.mapValues {
             let share = total * ignoredDelta / Double(100 * deltas.count)
             return $0 < 0 ? min($0 + share, 0) : max($0 - share, 0)
         }
-        deltas.forEach { (key, value) in
-            if value > 0 {
-                print("Buy \(value.usdFormat) of \(key)")
-            } else {
-                print("Sell \(abs(value).usdFormat) of \(key)")
-            }
-        }
+        
+        // MARK: Part 2: Liquidity Matching
+        
+        print(deltaTransactions(deltas,
+                                balances: exchangeData.balances.grouped(by: \.ticker),
+                                tickers: exchangeData.tickers))
     }
     
-    private func deltasForGroup(_ group: [String], balances: [String : BalanceList], delta: Double) -> [String : Double] {
+    private func deltaTransactions(_ deltas: [String : Double],
+                                   balances: [String : BalanceList],
+                                   tickers: [Ticker]) -> [String] {
+        
+        
+        var sellTransactions: [String] = []
+        var buyTransactions: [String] = []
+
+        // Sells
+        let sells = deltas.filter { $1 < 0 }
+        let buys = deltas.filter { $1 > 0 }
+        
+        var sellLiq: [Exchange : [(String, Double)]] = [:]
+        var buyLiq: [Set<Exchange> : [(String, Double)]] = [:]
+        
+        for (ticker, delta) in sells {
+            let balances = balances[ticker]!
+            for balance in balances {
+                if let _ = sellLiq[balance.exchange] {
+                    sellLiq[balance.exchange]!.append((ticker, max(-balance.usdValue, delta)))
+                } else {
+                    sellLiq[balance.exchange] = [(ticker, max(-balance.usdValue, delta))]
+                }
+            }
+        }
+        
+        for (ticker, delta) in buys {
+            let exchanges = Set(tickers.compactMap { t -> Exchange? in
+                if t.ticker == ticker {
+                    return t.exchange
+                }
+                return nil
+            })
+            
+            if let _ = buyLiq[exchanges] {
+                buyLiq[exchanges]!.append((ticker, delta))
+            } else {
+                buyLiq[exchanges] = [(ticker, delta)]
+            }
+        }
+        
+        // Match Liquidity
+        
+        var postSellLiq: [Exchange : Double] = [:]
+        
+        if let currentUSD = balances["USD"] {
+            for balance in currentUSD {
+                postSellLiq[balance.exchange] = balance.usdValue
+            }
+        }
+        
+        for (ticker, delta) in sells {
+            let exchangesWithSellLiquidity = sellLiq
+                .filter { _, ts in ts.contains(where: { $0.0 == ticker }) }
+                .mapValues { ts in
+                    ts.compactMap { (k, v) -> Double? in
+                        if k == ticker {
+                            return v
+                        }
+                        return nil
+                    }.first!
+                }
+                .sorted(by: { abs($0.1) > abs($1.1) })
+            var d = delta, i = 0
+            while d < 0 {
+                let value = min(d, exchangesWithSellLiquidity[i].value)
+                let exchange = exchangesWithSellLiquidity[i].key
+                d -= value
+                sellTransactions.append("Sell \(abs(value).usdFormat) of \(ticker) on \(exchange.rawValue)")
+                if let currentBalance = postSellLiq[exchange] {
+                    postSellLiq[exchange] = currentBalance + abs(value)
+                } else {
+                    postSellLiq[exchange] = abs(value)
+                }
+                if let index = sellLiq[exchange]?.firstIndex(where: { s, _ in
+                    s == ticker
+                }) {
+                    let v: Double = sellLiq[exchange]![index].1
+                    if v == value {
+                        sellLiq[exchange]!.remove(at: index)
+                    } else {
+                        sellLiq[exchange]![index].1 = v - value
+                    }
+                }
+                i += 1
+            }
+        }
+        
+        var sortedLiq = postSellLiq.sorted { $0.value > $1.value }
+        for (exchange, liquidity) in sortedLiq {
+            var liquidity = liquidity, i = 0
+            let keys = buyLiq.keys.filter { $0.contains(exchange) }.sorted { $0.count < $1.count }
+            let tempBuyLiq = buyLiq
+            for key in keys {
+                while liquidity > 0, i < tempBuyLiq[key]!.count {
+                    let ticker = tempBuyLiq[key]![i]
+                    let value = min(ticker.1, liquidity)
+                    if let index = buyLiq[key]?.firstIndex(where: { $0.1 == value}) {
+                        if tempBuyLiq[key]![i].1 == value {
+                            buyLiq[key]!.remove(at: index)
+                        } else {
+                            buyLiq[key]![index].1 = buyLiq[key]![index].1 - value
+                        }
+                    }
+                    postSellLiq[exchange] = postSellLiq[exchange]! - value
+                    liquidity -= value
+                    i += 1
+                    buyTransactions.append("Buy \(value.usdFormat) of \(ticker.0) in \(exchange.rawValue)")
+                }
+            }
+        }
+        
+        var transfers: [String] = []
+        sortedLiq = postSellLiq.sorted { $0.value > $1.value }
+        var outliers = buyLiq.filter { !$1.isEmpty }
+        if !outliers.isEmpty {
+            var i = 0, j = 0
+            for (exchange, liquidity) in sortedLiq {
+                var liquidity = liquidity
+                let outlierKeys = Array(outliers.keys)
+                while liquidity > 0, i < outlierKeys.count {
+                    let exchange2 = outlierKeys[i].first!
+                    let needs = outliers[outlierKeys[i]]!
+                    while liquidity > 0, j < needs.count {
+                        let need = needs[j]
+                        let value = min(liquidity, need.1)
+                        transfers.append("Transfer \(value.usdFormat) from \(exchange.rawValue) to \(exchange2.rawValue)")
+                        buyTransactions.append("Buy \(value.usdFormat) of \(need.0) in \(exchange2.rawValue)")
+                        outliers[outlierKeys[i]]![j].1 = outliers[outlierKeys[i]]![j].1 - value
+                        liquidity -= value
+                        if need.1 == value {
+                            j += 1
+                        }
+                    }
+                    if liquidity > 0 {
+                        i += 1
+                        j = 0
+                    }
+                }
+            }
+        }
+        
+        return sellTransactions + transfers + buyTransactions
+    }
+    
+    private func deltasForGroup(_ group: [String],
+                                balances: [String : BalanceList],
+                                delta: Double) -> [String : Double] {
         let total = balances.map { $1.total(\.usdValue) }.total
         let target = total + delta
         let equilibrium = target / Double(group.count)
