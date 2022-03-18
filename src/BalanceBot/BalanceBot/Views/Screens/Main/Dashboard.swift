@@ -13,6 +13,7 @@ struct DashboardView: View {
     @Environment(\.injection) private var injection: Injection
     @State var userSettings: UserSettings
     @State var exchangeData: Loadable<ExchangeData> = .notRequested
+    @State var rebalanceTransactions: [String]? = nil
     @State private var routingState: Routing = .init()
     private var routingBinding: Binding<Routing> {
         $routingState.dispatched(to: injection.appState, \.routing.dashboard)
@@ -29,6 +30,9 @@ struct DashboardView: View {
                 }
             }
             .onReceive(routingUpdate) { routingState = $0 }
+            .onChange(of: rebalanceTransactions, perform: { newValue in
+                print(newValue)
+            })
             .fullScreenCover(isPresented: routingBinding.apiKeys, content: { apiKeyView })
             .fullScreenCover(isPresented: routingBinding.strategy, content: { strategyView })
     }
@@ -114,7 +118,7 @@ extension DashboardView {
         VStack {
             BalancesView(exchangeData: exchangeData)
             Button("Calculate Rebalance") {
-                injection.exchangesInteractor.calculateRebalance(for: userSettings, with: exchangeData)
+                injection.exchangesInteractor.calculateRebalance(for: userSettings, with: exchangeData, transactions: $rebalanceTransactions)
             }
             Spacer()
         }

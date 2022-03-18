@@ -7,10 +7,12 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 protocol ExchangesInteractor {
     func fetchExchangeData(for account: Account)
-    func calculateRebalance(for userSettings: UserSettings, with exchangeData: ExchangeData)
+    func calculateRebalance(for userSettings: UserSettings, with exchangeData: ExchangeData,
+                            transactions: Binding<[String]?>)
 }
 
 struct RealExchangesInteractor: ExchangesInteractor {
@@ -75,48 +77,57 @@ struct RealExchangesInteractor: ExchangesInteractor {
     
     // MARK: Calculate Rebalance
     
-    func calculateRebalance(for userSettings: UserSettings, with exchangeData: ExchangeData) {
-        let total = exchangeData.balances.total(\.usdValue)
-        let targetAllocation = userSettings.portfolio.targetAllocation
-        let currentAllocation = currentAllocation(exchangeData.balances, userSettings.portfolio)
-        
-        let targetTickers = Set(targetAllocation.keys)
-        let currentTickers = Set(currentAllocation.keys)
-        
-        var deltas: [String : Double] = [:]
-        
-        var ignoredDelta: Double = 0
-        for ticker in currentTickers.union(targetTickers) {
-            let delta = (targetAllocation[ticker] ?? 0) -
-                        (currentAllocation[ticker] ?? 0)
-            if delta < 1 && delta > -1 {
-                ignoredDelta += abs(delta)
-            } else if let group = userSettings.portfolio.assetGroups[ticker] {
-                let balances = exchangeData.balances
-                    .filter { group.contains($0.ticker) }
-                    .grouped(by: \.ticker)
-                deltasForGroup(group, balances: balances, delta: total * delta / 100)
-                    .forEach { deltas[$0] = $1 }
-            } else if ticker != "USD" {
-                deltas[ticker] = total * delta / 100
+    func calculateRebalance(for userSettings: UserSettings, with exchangeData: ExchangeData,
+                            transactions: Binding<[String]?>) {
+        DispatchQueue.global().async {
+            let total = exchangeData.balances.total(\.usdValue)
+            let targetAllocation = userSettings.portfolio.targetAllocation
+            let currentAllocation = currentAllocation(exchangeData.balances, userSettings.portfolio)
+            
+            let targetTickers = Set(targetAllocation.keys)
+            let currentTickers = Set(currentAllocation.keys)
+            
+            var deltas: [String : Double] = [:]
+            
+            var ignoredDelta: Double = 0
+            for ticker in currentTickers.union(targetTickers) {
+                let delta = (targetAllocation[ticker] ?? 0) -
+                            (currentAllocation[ticker] ?? 0)
+                if delta < 1 && delta > -1 {
+                    ignoredDelta += abs(delta)
+                } else if let group = userSettings.portfolio.assetGroups[ticker] {
+                    let balances = exchangeData.balances
+                        .filter { group.contains($0.ticker) }
+                        .grouped(by: \.ticker)
+                    deltasForGroup(group, balances: balances, delta: total * delta / 100)
+                        .forEach { deltas[$0] = $1 }
+                } else if ticker != "USD" {
+                    deltas[ticker] = total * delta / 100
+                }
+            }
+            deltas = deltas.mapValues {
+                let share = total * ignoredDelta / Double(100 * deltas.count)
+                return $0 < 0 ? min($0 + share, 0) : max($0 - share, 0)
+            }
+            
+            // MARK: Part 2: Liquidity Matching
+            
+            let t = (1...20).map { _ -> [String] in
+                deltaTransactions(deltas,
+                                  balances: exchangeData.balances.grouped(by: \.ticker),
+                                  tickers: exchangeData.tickers)
+            }.sorted(by: { $0.count < $1.count }).first
+            
+            DispatchQueue.main.async {
+                transactions.wrappedValue = t
             }
         }
-        deltas = deltas.mapValues {
-            let share = total * ignoredDelta / Double(100 * deltas.count)
-            return $0 < 0 ? min($0 + share, 0) : max($0 - share, 0)
-        }
         
-        // MARK: Part 2: Liquidity Matching
-        
-        print(deltaTransactions(deltas,
-                                balances: exchangeData.balances.grouped(by: \.ticker),
-                                tickers: exchangeData.tickers))
     }
     
     private func deltaTransactions(_ deltas: [String : Double],
                                    balances: [String : BalanceList],
                                    tickers: [Ticker]) -> [String] {
-        
         
         var sellTransactions: [String] = []
         var buyTransactions: [String] = []
@@ -141,12 +152,8 @@ struct RealExchangesInteractor: ExchangesInteractor {
         
         for (ticker, delta) in buys {
             let exchanges = Set(tickers.compactMap { t -> Exchange? in
-                if t.ticker == ticker {
-                    return t.exchange
-                }
-                return nil
+                return t.ticker == ticker ? t.exchange : nil
             })
-            
             if let _ = buyLiq[exchanges] {
                 buyLiq[exchanges]!.append((ticker, delta))
             } else {
@@ -243,11 +250,13 @@ struct RealExchangesInteractor: ExchangesInteractor {
                     while liquidity > 0, j < needs.count {
                         let need = needs[j]
                         let value = min(liquidity, need.1)
-                        let transferKey = "\(exchange.rawValue):\(exchange2.rawValue)"
-                        if let currentValue = exchangeTransfers[transferKey] {
-                            exchangeTransfers[transferKey] = currentValue + value
-                        } else {
-                            exchangeTransfers[transferKey] = value
+                        if exchange != exchange2 {
+                            let transferKey = "\(exchange.rawValue):\(exchange2.rawValue)"
+                            if let currentValue = exchangeTransfers[transferKey] {
+                                exchangeTransfers[transferKey] = currentValue + value
+                            } else {
+                                exchangeTransfers[transferKey] = value
+                            }
                         }
                         buyTransactions.insert("Buy \(value.usdFormat) of \(need.0) on \(exchange2.rawValue)", at: 0)
                         outliers[outlierKeys[i]]![j].1 = outliers[outlierKeys[i]]![j].1 - value

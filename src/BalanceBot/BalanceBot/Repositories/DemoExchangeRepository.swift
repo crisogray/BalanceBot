@@ -45,7 +45,7 @@ extension Exchange {
     
     private var demoTickers: [String] {
         switch self {
-        case .bitfinex: return ["BTC", "ETH", "ADA"]
+        case .bitfinex: return ["BTC", "ETH", "ZEC"]
         case .ftx: return []
         case .kraken: return ["BTC", "SUSHI", "ZEC"]
         case .coinbase: return ["BTC", "ETH", "ZEC"]
@@ -56,8 +56,8 @@ extension Exchange {
         switch self {
         case .bitfinex: return ["BTC" : 5]
         case .ftx: return [:]
-        case .kraken: return ["ETH" : 1]
-        case .coinbase: return ["BTC" : 5, "ETH" : 1, "ZEC" : 2.5]
+        case .kraken: return ["ETH" : 100]
+        case .coinbase: return ["BTC" : 4, "ETH" : 1, "ZEC" : 2.5]
         }
     }
     
