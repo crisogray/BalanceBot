@@ -114,6 +114,7 @@ extension Array where Element == Balance.ExchangeBalance {
             } else if let price = prices.first(where: {
                 $0.ticker == exchangeBalance.ticker
             }) { return Balance(exchangeBalance, price: price.price) }
+            print(exchangeBalance.ticker)
             return nil
         }
     }

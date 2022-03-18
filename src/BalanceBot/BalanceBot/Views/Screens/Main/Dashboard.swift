@@ -13,7 +13,11 @@ struct DashboardView: View {
     @Environment(\.injection) private var injection: Injection
     @State var userSettings: UserSettings
     @State var exchangeData: Loadable<ExchangeData> = .notRequested
+    @State var isLoadingRebalance = false
     @State var rebalanceTransactions: [String]? = nil
+    @State var rebalanceTotal = 0
+    @State var rebalanceProgress = 0
+    @State var showRebalance = false
     @State private var routingState: Routing = .init()
     private var routingBinding: Binding<Routing> {
         $routingState.dispatched(to: injection.appState, \.routing.dashboard)
@@ -31,10 +35,23 @@ struct DashboardView: View {
             }
             .onReceive(routingUpdate) { routingState = $0 }
             .onChange(of: rebalanceTransactions, perform: { newValue in
-                print(newValue)
+                isLoadingRebalance = false
+                showRebalance = newValue != nil
             })
             .fullScreenCover(isPresented: routingBinding.apiKeys, content: { apiKeyView })
             .fullScreenCover(isPresented: routingBinding.strategy, content: { strategyView })
+            .fullScreenCover(isPresented: $showRebalance) {
+                if let strings = rebalanceTransactions {
+                    VStack {
+                        Button("Close") {
+                            showRebalance = false
+                        }
+                        ForEach(strings, id: \.self) { transaction in
+                            Text(transaction).padding(.top)
+                        }
+                    }
+                }
+            }
     }
     
     var content: AnyView {
@@ -117,8 +134,18 @@ extension DashboardView {
     func loadedView(_ userSettings: UserSettings, _ exchangeData: ExchangeData) -> some View {
         VStack {
             BalancesView(exchangeData: exchangeData)
-            Button("Calculate Rebalance") {
-                injection.exchangesInteractor.calculateRebalance(for: userSettings, with: exchangeData, transactions: $rebalanceTransactions)
+            
+            if isLoadingRebalance {
+                ProgressView("Loading...", value: Double(rebalanceProgress), total: Double(rebalanceTotal))
+                        .padding(.horizontal, 48)
+            } else {
+                Button("Calculate Rebalance") {
+                    isLoadingRebalance = true
+                    injection.exchangesInteractor
+                        .calculateRebalance(for: userSettings, with: exchangeData,
+                                               $rebalanceTotal, $rebalanceProgress,
+                                               transactions: $rebalanceTransactions)
+                }.disabled(isLoadingRebalance)
             }
             Spacer()
         }

@@ -97,7 +97,7 @@ extension Exchange {
     
     var priceTickerRegexPattern: String {
         switch self {
-        case .bitfinex: return "^t(.+?)(USD)?(BTC)?(ETH)?$"
+        case .bitfinex: return "^t(.+?):?(USD)?(BTC)?(ETH)?$"
         case .kraken: return "^X(.+?)Z?USD\\Z"
         default: return "^(.+)\\Z"
         }
@@ -125,7 +125,9 @@ extension Exchange {
                       throw AppError.noRegexMatches
             }
             return String(ticker[currencyRange])
-        } catch { return ticker }
+        } catch {
+            return ticker
+        }
     }
     
 }

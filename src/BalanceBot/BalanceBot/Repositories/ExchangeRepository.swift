@@ -66,9 +66,13 @@ struct ActualExchangeRepository: ExchangeRepository {
                 }
             ).map { prices in prices.compactMap { $0 } }.eraseToAnyPublisher()
         } else {
+            print(exchange.rawValue, tickers)
             return URLSession(configuration: .default)
-                .dataTaskPublisher(for: API.getPrices(exchange, tickers).urlRequest)
-                .tryMap { data, _ in
+                .dataTaskPublisher(for: API.getPrices(exchange, tickers.filter { $0 != "USD" }).urlRequest)
+                .tryMap { data, response in
+                    if exchange == .bitfinex {
+                        dump(try! JSON(data: data))
+                    }
                     return try JSON(data: data).decode(to: Balance.Price.self,
                                                        with: exchange.pricesSchema)
                 }
@@ -160,7 +164,7 @@ extension ActualExchangeRepository.API {
     private func pricesQuery(_ exchange: Exchange, tickers: [String]) -> String {
         let tickers = tickers.filter { $0 != "USD" }
         switch exchange {
-        case .bitfinex: return "symbols=\(tickers.map { "t\($0)USD" }.joined(separator: ","))"
+        case .bitfinex: return "symbols=\(tickers.map { "t\($0 + ($0.count > 3 ? ":" : ""))USD" }.joined(separator: ","))"
         case .kraken: return "pair=\(tickers.map { "\($0)USD" }.joined())"
         default: return ""
         }
