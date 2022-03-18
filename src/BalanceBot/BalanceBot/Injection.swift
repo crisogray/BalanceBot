@@ -19,7 +19,8 @@ struct Injection: EnvironmentKey {
         let userPermissionsInteractor = ActualUserPermissionsInteractor(appState: appState)
         let userSettingsInteractor = ActualUserSettingsInteractor(cloudKitRepository: ActualCloudKitRepository(),
                                                                   appState: appState)
-        let exchangesInteractor = RealExchangesInteractor(appState: appState, exchangeRepository: ActualExchangeRepository())
+        let exchangeRepository = DemoExchangeRepository() // ActualExchangeRepository()
+        let exchangesInteractor = RealExchangesInteractor(appState: appState, exchangeRepository: exchangeRepository)
         return .init(
             appState: appState,
             userPermissionsInteractor: userPermissionsInteractor,

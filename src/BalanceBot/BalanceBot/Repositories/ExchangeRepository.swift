@@ -40,7 +40,7 @@ struct ActualExchangeRepository: ExchangeRepository {
         }.eraseToAnyPublisher()
     }
     
-    private func twoStepBalances(_ publisher: AnyPublisher<JSON, Error>,
+    func twoStepBalances(_ publisher: AnyPublisher<JSON, Error>,
                                  _ exchange: Exchange) -> AnyPublisher<[Balance], Error> {
         publisher.map { json -> [Balance.ExchangeBalance] in
             return json.decode(to: Balance.ExchangeBalance.self, with: exchange.balancesSchema)

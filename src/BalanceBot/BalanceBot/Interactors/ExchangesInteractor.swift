@@ -169,10 +169,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
                 .filter { _, ts in ts.contains(where: { $0.0 == ticker }) }
                 .mapValues { ts in
                     ts.compactMap { (k, v) -> Double? in
-                        if k == ticker {
-                            return v
-                        }
-                        return nil
+                        return k == ticker ? v : nil
                     }.first!
                 }
                 .sorted(by: { abs($0.1) > abs($1.1) })
@@ -180,6 +177,9 @@ struct RealExchangesInteractor: ExchangesInteractor {
             while d < 0 {
                 let value = min(d, exchangesWithSellLiquidity[i].value)
                 let exchange = exchangesWithSellLiquidity[i].key
+                if value == d {
+                    i += 1
+                }
                 d -= value
                 sellTransactions.append("Sell \(abs(value).usdFormat) of \(ticker) on \(exchange.rawValue)")
                 if let currentBalance = postSellLiq[exchange] {
@@ -187,9 +187,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
                 } else {
                     postSellLiq[exchange] = abs(value)
                 }
-                if let index = sellLiq[exchange]?.firstIndex(where: { s, _ in
-                    s == ticker
-                }) {
+                /*if let index = sellLiq[exchange]?.firstIndex(where: { $0.0 == ticker }) {
                     let v: Double = sellLiq[exchange]![index].1
                     if v == value {
                         sellLiq[exchange]!.remove(at: index)
@@ -197,35 +195,41 @@ struct RealExchangesInteractor: ExchangesInteractor {
                         sellLiq[exchange]![index].1 = v - value
                     }
                 }
-                i += 1
+                i += 1*/
             }
         }
         
         var sortedLiq = postSellLiq.sorted { $0.value > $1.value }
+        var i = 0, j = 0
         for (exchange, liquidity) in sortedLiq {
-            var liquidity = liquidity, i = 0
+            var liquidity = liquidity
             let keys = buyLiq.keys.filter { $0.contains(exchange) }.sorted { $0.count < $1.count }
             let tempBuyLiq = buyLiq
-            for key in keys {
-                while liquidity > 0, i < tempBuyLiq[key]!.count {
-                    let ticker = tempBuyLiq[key]![i]
+            while liquidity > 0, i < keys.count {
+                let key = keys[i]
+                while liquidity > 0, j < tempBuyLiq[key]!.count {
+                    let ticker = tempBuyLiq[key]![j]
                     let value = min(ticker.1, liquidity)
                     if let index = buyLiq[key]?.firstIndex(where: { $0.1 == value}) {
-                        if tempBuyLiq[key]![i].1 == value {
+                        if tempBuyLiq[key]![j].1 == value {
                             buyLiq[key]!.remove(at: index)
+                            j += 1
                         } else {
                             buyLiq[key]![index].1 = buyLiq[key]![index].1 - value
                         }
                     }
                     postSellLiq[exchange] = postSellLiq[exchange]! - value
                     liquidity -= value
+                    buyTransactions.append("Buy \(value.usdFormat) of \(ticker.0) on \(exchange.rawValue)")
+                }
+                if liquidity > 0 {
                     i += 1
-                    buyTransactions.append("Buy \(value.usdFormat) of \(ticker.0) in \(exchange.rawValue)")
+                    j = 0
                 }
             }
         }
         
-        var transfers: [String] = []
+        var exchangeTransfers: [String : Double] = [:]
         sortedLiq = postSellLiq.sorted { $0.value > $1.value }
         var outliers = buyLiq.filter { !$1.isEmpty }
         if !outliers.isEmpty {
@@ -239,8 +243,13 @@ struct RealExchangesInteractor: ExchangesInteractor {
                     while liquidity > 0, j < needs.count {
                         let need = needs[j]
                         let value = min(liquidity, need.1)
-                        transfers.append("Transfer \(value.usdFormat) from \(exchange.rawValue) to \(exchange2.rawValue)")
-                        buyTransactions.append("Buy \(value.usdFormat) of \(need.0) in \(exchange2.rawValue)")
+                        let transferKey = "\(exchange.rawValue):\(exchange2.rawValue)"
+                        if let currentValue = exchangeTransfers[transferKey] {
+                            exchangeTransfers[transferKey] = currentValue + value
+                        } else {
+                            exchangeTransfers[transferKey] = value
+                        }
+                        buyTransactions.insert("Buy \(value.usdFormat) of \(need.0) on \(exchange2.rawValue)", at: 0)
                         outliers[outlierKeys[i]]![j].1 = outliers[outlierKeys[i]]![j].1 - value
                         liquidity -= value
                         if need.1 == value {
@@ -253,6 +262,11 @@ struct RealExchangesInteractor: ExchangesInteractor {
                     }
                 }
             }
+        }
+        
+        let transfers = exchangeTransfers.map { key, value -> String in
+            let exchanges = key.split(separator: ":")
+            return "Transfer \(value.usdFormat) from \(exchanges[0]) to \(exchanges[1])"
         }
         
         return sellTransactions + transfers + buyTransactions

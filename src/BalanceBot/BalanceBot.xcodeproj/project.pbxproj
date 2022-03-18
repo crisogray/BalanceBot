@@ -20,6 +20,7 @@
 		B579042727BC214F0038AB83 /* Exchange.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042627BC214F0038AB83 /* Exchange.swift */; };
 		B579042B27BD18CB0038AB83 /* JSONSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042A27BD18CB0038AB83 /* JSONSchema.swift */; };
 		B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = B579042D27BD1FD50038AB83 /* SwiftyJSON */; };
+		B57EB71627E4C8A800582748 /* DemoExchangeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57EB71527E4C8A800582748 /* DemoExchangeRepository.swift */; };
 		B5A51D3427D8DD4D006E7DF9 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = B5A51D3327D8DD4D006E7DF9 /* SwiftUICharts */; };
 		B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */; };
 		B5A51D3A27D8E4E2006E7DF9 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */; };
@@ -52,6 +53,7 @@
 		B579042427BC115A0038AB83 /* ExchangeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExchangeRepository.swift; sourceTree = "<group>"; };
 		B579042627BC214F0038AB83 /* Exchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exchange.swift; sourceTree = "<group>"; };
 		B579042A27BD18CB0038AB83 /* JSONSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
+		B57EB71527E4C8A800582748 /* DemoExchangeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoExchangeRepository.swift; sourceTree = "<group>"; };
 		B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalancesView.swift; sourceTree = "<group>"; };
 		B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		B5A51D3C27D8FAD5006E7DF9 /* Strategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strategy.swift; sourceTree = "<group>"; };
@@ -221,6 +223,7 @@
 			children = (
 				B5B4ADA627AC09F9008921AC /* CloudKitRepository.swift */,
 				B579042427BC115A0038AB83 /* ExchangeRepository.swift */,
+				B57EB71527E4C8A800582748 /* DemoExchangeRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -345,6 +348,7 @@
 				B5A51D4A27DBF9EE006E7DF9 /* LoadingView.swift in Sources */,
 				B563E44027AEC31C00E7CA83 /* CancelBag.swift in Sources */,
 				B5A51D4327DAB470006E7DF9 /* AssetGroups.swift in Sources */,
+				B57EB71627E4C8A800582748 /* DemoExchangeRepository.swift in Sources */,
 				B563E43827AD5ABF00E7CA83 /* CloudKitHelpers.swift in Sources */,
 				B5B4ADA527ABEC56008921AC /* Models.swift in Sources */,
 				B563E43E27AEC31C00E7CA83 /* Loadable.swift in Sources */,

@@ -20,8 +20,6 @@ protocol UserSettingsInteractor {
     func updateTargetAllocation(_ targetAllocation: [String : Double], in userSettings: UserSettings)
     func updateRebalanceTrigger(_ rebalanceTrigger: RebalanceTrigger, in userSettings: UserSettings)
     func updateIsLive(_ isLive: Bool, in userSettings: UserSettings)
-    
-    // Asset Groups
     func addAssetGroup(_ group: [String], withName name: String, to userSettings: UserSettings)
     func updateAssetGroup(_ name: String, newName: String, newGroup: [String], in userSettings: UserSettings)
     func removeAssetGroup(_ name: String, from userSettings: UserSettings)
@@ -84,14 +82,6 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
                     Result.Publisher(.success(userSettings))
                 }.eraseToAnyPublisher()
         }.eraseToAnyPublisher()
-        
-        /*return cloudKitRepository.subscribeToNotifications(for: portfolio.id)
-            .flatMap { _ in
-                Publishers.Zip(
-                    cloudKitRepository.saveRecord(account.ckRecord, in: .priv),
-                    cloudKitRepository.saveRecord(portfolio.ckRecord, in: .pub)
-                )
-            }.eraseToAnyPublisher()*/
     }
     
     // MARK: Notifications
