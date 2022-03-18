@@ -112,7 +112,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
             
             // MARK: Part 2: Liquidity Matching
             
-            let t = (1...20).map { _ -> [String] in
+            let t = (1...(deltas.count * 200)).map { _ -> [String] in
                 deltaTransactions(deltas,
                                   balances: exchangeData.balances.grouped(by: \.ticker),
                                   tickers: exchangeData.tickers)
@@ -170,7 +170,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
                 postSellLiq[balance.exchange] = balance.usdValue
             }
         }
-        
+                
         for (ticker, delta) in sells {
             let exchangesWithSellLiquidity = sellLiq
                 .filter { _, ts in ts.contains(where: { $0.0 == ticker }) }
@@ -178,13 +178,14 @@ struct RealExchangesInteractor: ExchangesInteractor {
                     ts.compactMap { (k, v) -> Double? in
                         return k == ticker ? v : nil
                     }.first!
-                }
-                .sorted(by: { abs($0.1) > abs($1.1) })
+                }.shuffled()
+            //print(exchangesWithSellLiquidity)
+                //.sorted(by: { abs($0.1) > abs($1.1) })
             var d = delta, i = 0
-            while d < 0 {
-                let value = min(d, exchangesWithSellLiquidity[i].value)
+            while d < 0, i < exchangesWithSellLiquidity.count {
+                let value = max(d, exchangesWithSellLiquidity[i].value)
                 let exchange = exchangesWithSellLiquidity[i].key
-                if value == d {
+                if value == exchangesWithSellLiquidity[i].value {
                     i += 1
                 }
                 d -= value
@@ -206,11 +207,11 @@ struct RealExchangesInteractor: ExchangesInteractor {
             }
         }
         
-        var sortedLiq = postSellLiq.sorted { $0.value > $1.value }
+        var sortedLiq = postSellLiq.shuffled()//.sorted { $0.value > $1.value }
         var i = 0, j = 0
         for (exchange, liquidity) in sortedLiq {
             var liquidity = liquidity
-            let keys = buyLiq.keys.filter { $0.contains(exchange) }.sorted { $0.count < $1.count }
+            let keys = buyLiq.keys.filter { $0.contains(exchange) }.shuffled()//.sorted { $0.count < $1.count }
             let tempBuyLiq = buyLiq
             while liquidity > 0, i < keys.count {
                 let key = keys[i]
@@ -237,7 +238,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
         }
         
         var exchangeTransfers: [String : Double] = [:]
-        sortedLiq = postSellLiq.sorted { $0.value > $1.value }
+        sortedLiq = postSellLiq.shuffled()//.sorted { $0.value > $1.value }
         var outliers = buyLiq.filter { !$1.isEmpty }
         if !outliers.isEmpty {
             var i = 0, j = 0
@@ -245,7 +246,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
                 var liquidity = liquidity
                 let outlierKeys = Array(outliers.keys)
                 while liquidity > 0, i < outlierKeys.count {
-                    let exchange2 = outlierKeys[i].first!
+                    let exchange2 = outlierKeys[i].randomElement()!//.first!
                     let needs = outliers[outlierKeys[i]]!
                     while liquidity > 0, j < needs.count {
                         let need = needs[j]

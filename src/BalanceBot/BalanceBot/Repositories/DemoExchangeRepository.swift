@@ -35,9 +35,11 @@ struct DemoExchangeRepository: ExchangeRepository {
 
 extension Portfolio {
     
-    /*var demo: Portfolio {
+    /*
+    var demo: Portfolio {
         .init(id: <#T##String#>, rebalanceTrigger: <#T##RebalanceTrigger#>, targetAllocation: <#T##[String : Double]#>, balances: <#T##[String : Double]#>, assetGroups: <#T##[String : [String]]#>, isLive: <#T##Int#>)
-    }*/
+    }
+    */
     
 }
 
@@ -45,7 +47,7 @@ extension Exchange {
     
     private var demoTickers: [String] {
         switch self {
-        case .bitfinex: return ["BTC", "ETH", "ZEC"]
+        case .bitfinex: return ["BTC", "ETH", "ADA"]
         case .ftx: return []
         case .kraken: return ["BTC", "SUSHI", "ZEC"]
         case .coinbase: return ["BTC", "ETH", "ZEC"]
@@ -54,10 +56,10 @@ extension Exchange {
     
     private var demoBalances: [String : Double] {
         switch self {
-        case .bitfinex: return ["BTC" : 5]
+        case .bitfinex: return ["BTC" : 5, "ADA" : 40000]
         case .ftx: return [:]
-        case .kraken: return ["ETH" : 100]
-        case .coinbase: return ["BTC" : 4, "ETH" : 1, "ZEC" : 2.5]
+        case .kraken: return ["ETH" : 1]
+        case .coinbase: return ["BTC" : 0, "ETH" : 1, "ZEC" : 2.5]
         }
     }
     
