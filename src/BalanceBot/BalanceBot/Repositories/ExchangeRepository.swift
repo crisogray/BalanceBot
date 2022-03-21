@@ -57,24 +57,28 @@ struct ActualExchangeRepository: ExchangeRepository {
     
     func getPrices(for tickers: [String], on exchange: Exchange) -> AnyPublisher<[Balance.Price], Error> {
         if tickers.isEmpty {
-            return Fail(error: AppError.invalidRequest).eraseToAnyPublisher()
+            return Fail(error: AppError.invalidRequest)
+                .eraseToAnyPublisher()
         } else if exchange.singlePriceRequest && tickers.count > 1 {
             return Publishers.ZipMany<Balance.Price?, Error>(
                 tickers.filter { $0 != "USD" }.map { ticker in
                     return getPrices(for: [ticker], on: exchange)
-                        .map { $0.first } .eraseToAnyPublisher()
+                        .map { $0.first }
+                        .eraseToAnyPublisher()
                 }
-            ).map { prices in prices.compactMap { $0 } }.eraseToAnyPublisher()
+            ).map { prices in prices.compactMap { $0 } }
+            .eraseToAnyPublisher()
         } else {
-            print(exchange.rawValue, tickers)
             return URLSession(configuration: .default)
-                .dataTaskPublisher(for: API.getPrices(exchange, tickers.filter { $0 != "USD" }).urlRequest)
+                .dataTaskPublisher(
+                    for: API.getPrices(
+                        exchange,
+                        tickers.filter { $0 != "USD" }
+                    ).urlRequest)
                 .tryMap { data, response in
-                    if exchange == .bitfinex {
-                        dump(try! JSON(data: data))
-                    }
-                    return try JSON(data: data).decode(to: Balance.Price.self,
-                                                       with: exchange.pricesSchema)
+                    return try JSON(data: data)
+                        .decode(to: Balance.Price.self,
+                                with: exchange.pricesSchema)
                 }
                 .receive(on: DispatchQueue.main)
                 .eraseToAnyPublisher()

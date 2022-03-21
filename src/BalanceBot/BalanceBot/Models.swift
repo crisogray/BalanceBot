@@ -65,11 +65,7 @@ enum RebalanceTrigger: Hashable {
     
     enum CalendarSchedule: String, CaseIterable {
         case weekly, monthly, quarterly, sixMonthly = "six-monthly", yearly
-        
-        var displayString: String {
-            rawValue.capitalized
-        }
-        
+        var displayString: String { rawValue.capitalized }
     }
     
     case calendar(CalendarSchedule)
@@ -94,8 +90,7 @@ extension RebalanceTrigger {
     
     func isSameType(as other: RebalanceTrigger) -> Bool {
         switch (self, other) {
-        case (.calendar, .calendar),
-            (.threshold, .threshold): return true
+        case (.calendar, .calendar), (.threshold, .threshold): return true
         default: return false
         }
     }
@@ -114,7 +109,6 @@ extension Array where Element == Balance.ExchangeBalance {
             } else if let price = prices.first(where: {
                 $0.ticker == exchangeBalance.ticker
             }) { return Balance(exchangeBalance, price: price.price) }
-            print(exchangeBalance.ticker)
             return nil
         }
     }
