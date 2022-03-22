@@ -51,8 +51,7 @@ struct DashboardView: View {
                         }
                         List {
                             ForEach(strings, id: \.self) { transaction in
-                                Text(transaction)
-                                    .font(.title2).padding(.top)
+                                Text(transaction).font(.headline)
                             }
                         }.listStyle(PlainListStyle())
                     }
