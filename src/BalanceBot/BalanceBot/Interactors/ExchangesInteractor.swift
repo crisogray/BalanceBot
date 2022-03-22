@@ -81,13 +81,15 @@ struct RealExchangesInteractor: ExchangesInteractor {
                                 balances: [String : BalanceList],
                                 delta: Double) -> [String : Double] {
         let total = balances.map { $1.total(\.usdValue) }.total
-        let target = total + delta
-        let equilibrium = target / Double(group.count)
-        let deltaBalances = balances.filter { _, balance in
+        let equilibrium = (total + delta) / Double(group.count)
+        let deltaBalances = balances.compactMapValues { balance -> Double? in
             let total = balance.total(\.usdValue)
-            return delta > 0 ? (total < equilibrium) : (total > equilibrium)
+            if (delta > 0) == (total < equilibrium) {
+                return abs(total - equilibrium)
+            }
+            return nil
         }
-        return deltaBalances.mapValues { _ in delta / Double(deltaBalances.count) }
+        return deltaBalances.mapValues { delta * $0 / abs(delta) }
     }
     
     private func currentAllocation(_ balances: BalanceList, _ portfolio: Portfolio) -> [String : Double] {
@@ -140,27 +142,22 @@ struct RealExchangesInteractor: ExchangesInteractor {
             let share = total * ignoredDelta / Double(100 * deltas.count)
             return $0 < 0 ? min($0 + share, 0) : max($0 - share, 0)
         }
-        
-        // MARK: Part 2: Liquidity Matching
-            
+                    
         let count = deltas.count * 300
         iterations.wrappedValue = count
         progress.wrappedValue = 0
         
         DispatchQueue.global().async {
             let t = (1...count).map { i -> [String] in
-                DispatchQueue.main.async {
-                    progress.wrappedValue = i
-                }
+                DispatchQueue.main.async { progress.wrappedValue = i }
                 return transactionSolution(deltas, exchangeData: exchangeData)
             }.sorted(by: { $0.count < $1.count }).first
-            
-            DispatchQueue.main.async {
-                transactions.wrappedValue = t
-            }
+            DispatchQueue.main.async { transactions.wrappedValue = t }
         }
         
     }
+    
+    // MARK: Part 2: Liquidity Matching
     
     private func transactionSolution(_ deltas: [String : Double],
                                      exchangeData: ExchangeData) -> [String] {

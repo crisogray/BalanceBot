@@ -43,12 +43,18 @@ struct DashboardView: View {
             .fullScreenCover(isPresented: $showRebalance) {
                 if let strings = rebalanceTransactions {
                     VStack {
-                        Button("Close") {
-                            showRebalance = false
+                        HStack {
+                            Spacer()
+                            Button("Close") {
+                                showRebalance = false
+                            }
                         }
-                        ForEach(strings, id: \.self) { transaction in
-                            Text(transaction).padding(.top)
-                        }
+                        List {
+                            ForEach(strings, id: \.self) { transaction in
+                                Text(transaction)
+                                    .font(.title2).padding(.top)
+                            }
+                        }.listStyle(PlainListStyle())
                     }
                 }
             }
@@ -136,15 +142,14 @@ extension DashboardView {
             BalancesView(exchangeData: exchangeData)
             
             if isLoadingRebalance {
-                ProgressView("Loading...", value: Double(rebalanceProgress), total: Double(rebalanceTotal))
-                        .padding(.horizontal, 48)
+                ProgressView("Calculating Rebalance...", value: Double(rebalanceProgress), total: Double(rebalanceTotal))
+                    .frame(width: 200)
             } else {
-                Button("Calculate Rebalance") {
-                    isLoadingRebalance = true
-                    injection.exchangesInteractor
-                        .calculateRebalance(for: userSettings, with: exchangeData,
-                                               $rebalanceTotal, $rebalanceProgress,
-                                               transactions: $rebalanceTransactions)
+                Button(action: calculateRebalance) {
+                    Text("Calculate Rebalance")
+                        .font(.headline).padding()
+                        .background(Color(.secondarySystemGroupedBackground))//red: 53 / 255, green: 53 / 255, blue: 53 / 255))
+                        .cornerRadius(8)
                 }.disabled(isLoadingRebalance)
             }
             Spacer()
@@ -171,6 +176,14 @@ extension DashboardView {
 // MARK: Functions
 
 extension DashboardView {
+    
+    func calculateRebalance() {
+        isLoadingRebalance = true
+        injection.exchangesInteractor
+            .calculateRebalance(for: userSettings, with: exchangeData.loadedValue,
+                                   $rebalanceTotal, $rebalanceProgress,
+                                   transactions: $rebalanceTransactions)
+    }
     
     func showAPIKeys() {
         injection.appState[\.routing.dashboard.apiKeys] = true

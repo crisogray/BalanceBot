@@ -56,7 +56,7 @@ extension StrategyView {
         VStack(spacing: 0) {
             List {
                 Section(header: Text("Portfolio Settings")) {
-                    Toggle("Strategy Active", isOn: $isLive)
+                    Toggle("Receive Notifications", isOn: $isLive)
                         .disabled(targetAllocation != userSettings.portfolio.targetAllocation || total != 100 || isLoadingIsLive)
                     Picker("Rebalance Trigger", selection: $rebalanceTrigger) {
                         Text("Calendar").tag(RebalanceTrigger.calendar(.monthly))

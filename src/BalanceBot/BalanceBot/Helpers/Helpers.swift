@@ -72,11 +72,9 @@ extension Equatable {
 // MARK: String
 
 extension String {
-    
     var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
 }
 
 // MARK: Array and Dictionary
@@ -97,10 +95,8 @@ extension Array where Element: Equatable {
     }
     
     mutating func addUnique(contentsOf array: [Element]) {
-        array.forEach { element in
-            if !contains(element) {
-                append(element)
-            }
+        for element in array where !contains(element) {
+            append(element)
         }
     }
     

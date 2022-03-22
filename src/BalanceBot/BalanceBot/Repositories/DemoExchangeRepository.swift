@@ -13,10 +13,11 @@ struct DemoExchangeRepository: ExchangeRepository {
     let actualExchangeRepository = ActualExchangeRepository()
     
     func getBalances(on exchange: Exchange, with key: String, and secret: String) -> AnyPublisher<[Balance], Error> {
-        return Just(exchange.balances).flatMap { exchangeBalances in
-            Publishers.Zip(Result.Publisher(.success(exchangeBalances)),
-                           getPrices(for: exchangeBalances.map { $0.ticker }, on: exchange))
-                .eraseToAnyPublisher()
+        Just(exchange.balances).flatMap { exchangeBalances in
+            Publishers.Zip(
+                Result.Publisher(.success(exchangeBalances)),
+                getPrices(for: exchangeBalances.map { $0.ticker }, on: exchange)
+            ).eraseToAnyPublisher()
         }.flatMap { (exchangeBalances, prices) in
             Result<[Balance], Error>.Publisher(.success(exchangeBalances.convertToBalances(prices)))
         }.eraseToAnyPublisher()
@@ -27,9 +28,8 @@ struct DemoExchangeRepository: ExchangeRepository {
     }
     
     func getTickers(on exchange: Exchange) -> AnyPublisher<[Ticker], Error> {
-        return Just(exchange.tickers).setFailureType(to: Error.self).eraseToAnyPublisher()
+        Just(exchange.tickers).setFailureType(to: Error.self).eraseToAnyPublisher()
     }
-    
     
 }
 
@@ -46,10 +46,10 @@ extension Exchange {
     
     private var demoBalances: [String : Double] {
         switch self {
-        case .bitfinex: return ["BTC" : 30, "ADA" : 4000, "USD" : 20000]
+        case .bitfinex: return ["BTC" : 0.1, "ADA" : 40000, "USD" : 2000]
         case .ftx: return [:]
-        case .kraken: return ["ETH" : 60, "SUSHI" : 500, "USD" : 1000000]
-        case .coinbase: return ["BTC" : 1, "ETH" : 50, "ZEC" : 600.5]
+        case .kraken: return ["ETH" : 6, "SUSHI" : 500, "USD" : 10000]
+        case .coinbase: return ["BTC" : 0.5, "ETH" : 5, "ZEC" : 600.5]
         }
     }
     
