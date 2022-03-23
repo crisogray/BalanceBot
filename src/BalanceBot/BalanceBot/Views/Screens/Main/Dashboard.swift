@@ -27,11 +27,11 @@ struct DashboardView: View {
         content
             .onReceive(userSettingsUpdate) { userSettings = $0.loadedValue }
             .onReceive(exchangeUpdate) {
-                exchangeData = $0
-                if case let .loaded(exchangeData) = $0 {
+                if case let .loaded(exchangeData) = $0, exchangeData.balances != self.exchangeData.value?.balances {
                     injection.userSettingsInteractor
                         .updateBalances(exchangeData.balances, in: userSettings)
                 }
+                exchangeData = $0
             }
             .onReceive(routingUpdate) { routingState = $0 }
             .onChange(of: rebalanceTransactions, perform: { newValue in

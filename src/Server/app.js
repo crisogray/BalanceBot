@@ -88,13 +88,13 @@ function aggregateTickers(records) {
 }
 
 async function idsForSymbols(tickers) {
-    let data = await CoinGeckoClient.coins.list()
+    let data = await CoinGeckoClient.coins.list();
     let currencies = data.data.filter(function (obj) {
         return tickers.includes(obj.symbol.toUpperCase());
     });
-    let symbolIds = {}
+    let symbolIds = {};
     for (const currency of currencies) {
-        const symbol = currency.symbol.toUpperCase()
+        const symbol = currency.symbol.toUpperCase();
         const currentId = symbolIds[symbol]
         if (currentId && currency.id.length > currentId.length) 
             continue;

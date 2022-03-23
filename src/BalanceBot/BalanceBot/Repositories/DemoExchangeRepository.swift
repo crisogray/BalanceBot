@@ -37,7 +37,7 @@ extension Exchange {
     
     private var demoTickers: [String] {
         switch self {
-        case .bitfinex: return ["BTC", "ETH", "ADA", "LTC"]
+        case .bitfinex: return ["BTC", "ETH", "ADA", "LTC", "XMR"]
         case .ftx: return []
         case .kraken: return ["BTC", "SUSHI", "LTC", "XMR"]
         case .coinbase: return ["BTC", "ETH", "ZEC", "LTC"]
@@ -46,10 +46,10 @@ extension Exchange {
     
     private var demoBalances: [String : Double] {
         switch self {
-        case .bitfinex: return ["BTC" : 1, "ADA" : 40000, "USD" : 2000]
+        case .bitfinex: return ["BTC" : 4, "ADA" : 4000, "USD" : 2000]
         case .ftx: return [:]
-        case .kraken: return ["ETH" : 1, "SUSHI" : 500, "USD" : 10000]
-        case .coinbase: return ["BTC" : 0.5, "ETH" : 1, "ZEC" : 600.5]
+        case .kraken: return ["ETH" : 1, "SUSHI" : 5000, "USD" : 1000]
+        case .coinbase: return ["BTC" : 0.5, "ETH" : 1, "ZEC" : 60.5, "USD" : 1000]
         }
     }
     

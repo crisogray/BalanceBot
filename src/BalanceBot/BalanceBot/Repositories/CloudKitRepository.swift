@@ -17,7 +17,6 @@ protocol CloudKitRepository {
     func updateRecord(_ record: CKRecord, in database: CloudKitDatabase) -> AnyPublisher<CKRecord, Error>
     func deleteRecords(_ records: [CKRecord.ID], from database: CloudKitDatabase) -> AnyPublisher<[CKRecord.ID], Error>
     func subscribeToNotifications(for portfolioId: String) -> AnyPublisher<CKSubscription, Error>
-    func hasNotifications(for portfolioId: String) -> AnyPublisher<Bool, Error>
     func fetchNotifications(for portfolioId: String) -> AnyPublisher<[CKRecord], Error>
 }
 
@@ -46,6 +45,7 @@ struct ActualCloudKitRepository: CloudKitRepository {
     }
     
     func fetchNotifications(for portfolioId: String) -> AnyPublisher<[CKRecord], Error> {
+        print("fetch notifications")
         let query = CKQuery(recordType: "Notification", predicate: notificationPredicate(portfolioId))
         /*return Future<[CKRecord], Error> {
             try await CloudKitDatabase.pub.database(container)
@@ -58,9 +58,6 @@ struct ActualCloudKitRepository: CloudKitRepository {
         .eraseToAnyPublisher()
     }
     
-    func hasNotifications(for portfolioId: String) -> AnyPublisher<Bool, Error> {
-        fetchNotifications(for: portfolioId).map { $0.isEmpty }.eraseToAnyPublisher()
-    }
     
     func fetchCurrentUserID() -> AnyPublisher<CKRecord.ID, Error> {
         resultErrorCallbackPublisher { completion in
@@ -69,9 +66,9 @@ struct ActualCloudKitRepository: CloudKitRepository {
     }
     
     func fetchRecord(from database: CloudKitDatabase, withId id: CKRecord.ID) -> AnyPublisher<CKRecord, Error> {
-        resultErrorCallbackPublisher({ completion in
+        resultErrorCallbackPublisher { completion in
             database.database(container).fetch(withRecordID: id, completionHandler: completion)
-        })
+        }
     }
     
     func saveRecord(_ record: CKRecord, in database: CloudKitDatabase) -> AnyPublisher<CKRecord, Error> {
@@ -88,6 +85,7 @@ struct ActualCloudKitRepository: CloudKitRepository {
     
     func deleteRecords(_ records: [CKRecord.ID], from database: CloudKitDatabase) -> AnyPublisher<[CKRecord.ID], Error> {
         resultErrorCallbackPublisher { completion in
+            print("Delete")
             let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: records)
             operation.modifyRecordsResultBlock = operationResultBlock(records, completion: completion)
             database.database(container).add(operation)
@@ -96,6 +94,7 @@ struct ActualCloudKitRepository: CloudKitRepository {
     
     func updateRecord(_ record: CKRecord, in database: CloudKitDatabase) -> AnyPublisher<CKRecord, Error> {
         resultErrorCallbackPublisher { completion in
+            print("Update")
             let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
             operation.savePolicy = .changedKeys
             operation.modifyRecordsResultBlock = operationResultBlock(record, completion: completion)

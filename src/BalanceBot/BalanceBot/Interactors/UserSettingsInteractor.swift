@@ -51,7 +51,9 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
             }.flatMap { userSettings in
                 Publishers.Zip(
                     Result.Publisher(.success(userSettings)),
-                    cloudKitRepository.hasNotifications(for: userSettings.1.recordID.recordName)
+                    cloudKitRepository
+                        .fetchNotifications(for: userSettings.1.recordID.recordName)
+                        .map { $0.isEmpty }
                 ).eraseToAnyPublisher()
             }.sinkToUserSettings {
                 appState[\.userSettings] = $0
@@ -65,7 +67,8 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
                 let userId = user["portfolio_id"] as! String
                 return Publishers.Zip(
                     Result.Publisher(.success(user)),
-                    cloudKitRepository.fetchRecord(from: .pub, withId: userId.ckRecordId)
+                    cloudKitRepository
+                        .fetchRecord(from: .pub, withId: userId.ckRecordId)
                 ).eraseToAnyPublisher()
         }.eraseToAnyPublisher()
     }
@@ -104,8 +107,6 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
                     appState[\.userSettings] = .loaded(userSettings)
                 }
             }.store(in: cancelBag)
-
-
     }
     
     // MARK: API Keys
@@ -167,7 +168,7 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
         update(userSettings, path: \.portfolio, isAccount: false, value: portfolio)
     }
     
-    func adjustTargetAllocation(_ allocation: inout [String : Double], with newTickers: [String],
+    private func adjustTargetAllocation(_ allocation: inout [String : Double], with newTickers: [String],
                                 groupName: String, oldName: String? = nil) {
         var totalAllocation: Double = newTickers.compactMap { allocation.removeValue(forKey: $0) }.total
         if let oldName = oldName, let previousAllocation = allocation.removeValue(forKey: oldName) {
@@ -188,11 +189,11 @@ struct ActualUserSettingsInteractor: UserSettingsInteractor {
     
     // MARK: Update
     
-    func update<T>(_ userSettings: UserSettings, path: WritableKeyPath<UserSettings, T>,
+    func update<T>(_ userSettings: UserSettings,
+                   path: WritableKeyPath<UserSettings, T>,
                    isAccount: Bool = true, value: T) {
         var settings = userSettings
         settings[keyPath: path] = value
-        
         let cancelBag = CancelBag()
         appState[\.userSettings].setIsLoading(cancelBag: cancelBag)
         let record = isAccount ? settings.account.ckRecord : settings.portfolio.ckRecord
