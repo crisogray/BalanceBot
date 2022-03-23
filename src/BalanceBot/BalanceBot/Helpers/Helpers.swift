@@ -53,6 +53,13 @@ extension Double {
         return formatter.string(from: NSNumber(value: self))!
     }
     
+    var percentageFormat: String {
+        if self > 10 {
+            return String(Int(self))
+        }
+        return String(format: "%.1f", self)
+    }
+    
 }
 
 extension Sequence where Element == Double {

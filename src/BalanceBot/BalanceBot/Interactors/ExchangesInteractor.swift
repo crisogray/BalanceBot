@@ -32,7 +32,6 @@ struct RealExchangesInteractor: ExchangesInteractor {
             } receiveValue: { balances, tickers in
                 appState[\.exchangeData] = .loaded(ExchangeData(balances: balances, tickers: tickers))
             }.store(in: cancelBag)
-
     }
     
     private func requestExchangeData(for account: Account) -> AnyPublisher<(BalanceList, [Ticker]), Error> {
@@ -40,7 +39,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
             .flatMap { balanceCollection, tickerCollection -> AnyPublisher<(BalanceList, [Ticker]), Error> in
                 let balances = balanceCollection.flatMap { $0 }
                 var tickers = tickerCollection.flatMap { $0 }
-                    .filter { allowedTickers.contains($0.ticker) }
+                    .filter { Exchange.allowedTickers.contains($0.ticker) }
                 tickers.addUnique(contentsOf: balances.map { Ticker([$0.ticker, $0.exchange])! } )
                 return Just((balances, tickers)).setFailureType(to: Error.self).eraseToAnyPublisher()
             }
@@ -105,8 +104,10 @@ struct RealExchangesInteractor: ExchangesInteractor {
         return allocation
     }
     
-    func calculateRebalance(for userSettings: UserSettings, with exchangeData: ExchangeData,
-                            _ iterations: Binding<Int>, _ progress: Binding<Int>, transactions: Binding<[String]?>) {
+    func calculateRebalance(for userSettings: UserSettings,
+                            with exchangeData: ExchangeData,
+                            _ iterations: Binding<Int>, _ progress: Binding<Int>,
+                            transactions: Binding<[String]?>) {
         let total = exchangeData.balances.total(\.usdValue)
         let target = userSettings.portfolio.targetAllocation
         let current = currentAllocation(exchangeData.balances, userSettings.portfolio)
@@ -144,11 +145,11 @@ struct RealExchangesInteractor: ExchangesInteractor {
                 return transactionSolution(deltas, exchangeData: exchangeData)
             }
             let bestCount = solutions.sorted(by: { $0.count < $1.count }).first!.count
-            let shortestSolutions = solutions.filter { $0.count == bestCount }
+            let shortestSolutions = solutions
+                .filter { $0.count == bestCount }
                 .sorted(by: { transferCount($0) < transferCount($1) })
             DispatchQueue.main.async { transactions.wrappedValue = shortestSolutions.first }
         }
-        
     }
     
     private func transferCount(_ s: [String]) -> Int {
@@ -161,19 +162,16 @@ struct RealExchangesInteractor: ExchangesInteractor {
                                      exchangeData: ExchangeData) -> [String] {
         
         let balances = exchangeData.balances.grouped(by: \.ticker)
-        
         var sellTransactions: [String] = [], buyTransactions: [String : Double] = [:]
-        
         var buyLiq: [Set<Exchange> : [(String, Double)]] = [:]
+        var postSellLiq = (balances["USD"] ?? [])
+            .reduce(into: [Exchange : Double]()) { $0[$1.exchange] = $1.usdValue }
         
         for (ticker, delta) in deltas.filter({ $1 > 0 }) {
             let exchanges = Set(exchangeData.tickers
                                     .compactMap { $0.ticker == ticker ? $0.exchange : nil })
             buyLiq[exchanges] = (buyLiq[exchanges] ?? []) + [(ticker, delta)]
         }
-        
-        var postSellLiq = (balances["USD"] ?? [])
-            .reduce(into: [Exchange : Double]()) { $0[$1.exchange] = $1.usdValue }
                 
         for (ticker, delta) in deltas.filter({ $1 < 0 }) {
             let sellExchanges = (balances[ticker] ?? [])
@@ -192,7 +190,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
             postSellLiq[exchange] = postSellLiq[exchange]! - value
             let buyKey = "\(ticker.0):\(exchange.rawValue)"
             buyTransactions[buyKey] = value + (buyTransactions[buyKey] ?? 0)
-        }.mapValues { $0.filter { v in v.1 > 0 } }.filter{ !$1.isEmpty }
+        }.mapValues { $0.filter { v in v.1 > 0 } }.filter { !$1.isEmpty }
 
         var exchangeTransfers: [String : Double] = [:]
                 
@@ -208,7 +206,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
         return sellTransactions + exchangeTransfers.map { key, value in
             let exchanges = key.split(separator: ":")
             return "Transfer \(value.usdFormat) from \(exchanges[0]) to \(exchanges[1])"
-        } + buyTransactions.map { key, value -> String in
+        } + buyTransactions.map { key, value in
             let k = key.split(separator: ":")
             return "Buy \(value.usdFormat) of \(k[0]) on \(k[1])"
         }

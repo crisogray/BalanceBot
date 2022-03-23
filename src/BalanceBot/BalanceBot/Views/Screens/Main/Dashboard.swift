@@ -19,6 +19,7 @@ struct DashboardView: View {
     @State var rebalanceProgress = 0
     @State var showRebalance = false
     @State private var routingState: Routing = .init()
+    private let w = UIScreen.main.bounds.width
     private var routingBinding: Binding<Routing> {
         $routingState.dispatched(to: injection.appState, \.routing.dashboard)
     }
@@ -84,12 +85,27 @@ extension DashboardView {
     func containerStack(_ content: AnyView) -> some View {
         VStack {
             content.frame(maxHeight: .infinity)
+            if isLoadingRebalance {
+                ProgressView(value: Double(rebalanceProgress), total: Double(rebalanceTotal))
+                    .frame(width: 192 + (w - 192) * 0.4)
+            }
             HStack {
                 Spacer()
                 dashboardButton(image: "slider.horizontal.3",
                                 label: "Strategy",
                                 action: showStrategy)
                     .disabled(exchangeData.value == nil)
+                Spacer()
+                if isLoadingRebalance {
+                    buttonStack("Rebalance") {
+                        dashboardButtonStyle { LoadingView() }
+                    }
+                } else {
+                    dashboardButton(image: "arrow.up.arrow.down",
+                                    label: "Rebalance",
+                                    action: calculateRebalance)
+                        .disabled(isLoadingRebalance)
+                }
                 Spacer()
                 dashboardButton(image: "key",
                                 label: "API Keys",
@@ -137,33 +153,30 @@ extension DashboardView {
     }
     
     func loadedView(_ userSettings: UserSettings, _ exchangeData: ExchangeData) -> some View {
-        VStack {
-            BalancesView(exchangeData: exchangeData)
-            
-            if isLoadingRebalance {
-                ProgressView("Calculating Rebalance...", value: Double(rebalanceProgress), total: Double(rebalanceTotal))
-                    .frame(width: 200)
-            } else {
-                Button(action: calculateRebalance) {
-                    Text("Calculate Rebalance")
-                        .font(.headline).padding()
-                        .background(Color(.secondarySystemGroupedBackground))//red: 53 / 255, green: 53 / 255, blue: 53 / 255))
-                        .cornerRadius(8)
-                }.disabled(isLoadingRebalance)
-            }
-            Spacer()
-        }
+        BalancesView(exchangeData: exchangeData)
     }
     
     func dashboardButton(image: String, label: String, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 12) {
+        buttonStack(label) {
             Button(action: action) {
-                Image(systemName: image)
-                    .imageScale(.large)
-                    .frame(width: 64, height: 64)
-                    .background(Color(.secondarySystemGroupedBackground))//red: 53 / 255, green: 53 / 255, blue: 53 / 255))
-                    .cornerRadius(32)
+                dashboardButtonStyle {
+                    Image(systemName: image)
+                        .imageScale(.large)
+                }
             }
+        }
+    }
+    
+    func dashboardButtonStyle<V: View>(_ content: () -> V) -> some View {
+        content()
+            .frame(width: 64, height: 64)
+            .background(Color(.secondarySystemGroupedBackground))//red: 53 / 255, green: 53 / 255, blue: 53 / 255))
+            .cornerRadius(32)
+    }
+    
+    func buttonStack<V: View>(_ label: String, content: () -> V) -> some View {
+        VStack(spacing: 12) {
+            content()
             Text(label.uppercased())
                 .font(.footnote.bold())
                 .foregroundColor(Color(.gray))

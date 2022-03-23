@@ -46,10 +46,10 @@ extension Exchange {
     
     private var demoBalances: [String : Double] {
         switch self {
-        case .bitfinex: return ["BTC" : 4, "ADA" : 4000, "USD" : 2000]
+        case .bitfinex: return ["BTC" : 0.2, "ADA" : 7000, "USD" : 2000]
         case .ftx: return [:]
         case .kraken: return ["ETH" : 1, "SUSHI" : 5000, "USD" : 1000]
-        case .coinbase: return ["BTC" : 0.5, "ETH" : 1, "ZEC" : 60.5, "USD" : 1000]
+        case .coinbase: return ["BTC" : 0.5, "ETH" : 1.7, "ZEC" : 70.5, "USD" : 1000]
         }
     }
     
