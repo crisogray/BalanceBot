@@ -21,6 +21,7 @@
 		B579042B27BD18CB0038AB83 /* JSONSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = B579042A27BD18CB0038AB83 /* JSONSchema.swift */; };
 		B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = B579042D27BD1FD50038AB83 /* SwiftyJSON */; };
 		B57EB71627E4C8A800582748 /* DemoExchangeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57EB71527E4C8A800582748 /* DemoExchangeRepository.swift */; };
+		B57EB71C27EC9AB100582748 /* Rebalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57EB71B27EC9AB100582748 /* Rebalance.swift */; };
 		B5A51D3427D8DD4D006E7DF9 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = B5A51D3327D8DD4D006E7DF9 /* SwiftUICharts */; };
 		B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */; };
 		B5A51D3A27D8E4E2006E7DF9 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */; };
@@ -54,6 +55,7 @@
 		B579042627BC214F0038AB83 /* Exchange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Exchange.swift; sourceTree = "<group>"; };
 		B579042A27BD18CB0038AB83 /* JSONSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONSchema.swift; sourceTree = "<group>"; };
 		B57EB71527E4C8A800582748 /* DemoExchangeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoExchangeRepository.swift; sourceTree = "<group>"; };
+		B57EB71B27EC9AB100582748 /* Rebalance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rebalance.swift; sourceTree = "<group>"; };
 		B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalancesView.swift; sourceTree = "<group>"; };
 		B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		B5A51D3C27D8FAD5006E7DF9 /* Strategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Strategy.swift; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 			children = (
 				B5B4AD9427AAE806008921AC /* Content.swift */,
 				B563E44527AFFBCF00E7CA83 /* Dashboard.swift */,
+				B57EB71B27EC9AB100582748 /* Rebalance.swift */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -331,6 +334,7 @@
 				B5B4AD9527AAE806008921AC /* Content.swift in Sources */,
 				B5B4AD9327AAE806008921AC /* BalanceBotApp.swift in Sources */,
 				B5A51D3D27D8FAD5006E7DF9 /* Strategy.swift in Sources */,
+				B57EB71C27EC9AB100582748 /* Rebalance.swift in Sources */,
 				B563E43F27AEC31C00E7CA83 /* Store.swift in Sources */,
 				B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */,
 				B5B4ADAF27AC0DEF008921AC /* AppState.swift in Sources */,

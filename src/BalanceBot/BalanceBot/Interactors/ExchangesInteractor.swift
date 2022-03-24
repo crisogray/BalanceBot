@@ -12,7 +12,7 @@ import SwiftUI
 protocol ExchangesInteractor {
     func fetchExchangeData(for account: Account)
     func calculateRebalance(for userSettings: UserSettings, with exchangeData: ExchangeData,
-                            _ total: Binding<Int>, _ progress: Binding<Int>, transactions: Binding<[String]?>)
+                            _ total: Binding<Int>, _ progress: Binding<Int>, transactions: Binding<[Instruction]?>)
 }
 
 struct RealExchangesInteractor: ExchangesInteractor {
@@ -107,7 +107,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
     func calculateRebalance(for userSettings: UserSettings,
                             with exchangeData: ExchangeData,
                             _ iterations: Binding<Int>, _ progress: Binding<Int>,
-                            transactions: Binding<[String]?>) {
+                            transactions: Binding<[Instruction]?>) {
         let total = exchangeData.balances.total(\.usdValue)
         let target = userSettings.portfolio.targetAllocation
         let current = currentAllocation(exchangeData.balances, userSettings.portfolio)
@@ -140,7 +140,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
         progress.wrappedValue = 0
         
         DispatchQueue.global().async {
-            let solutions = (1...count).map { i -> [String] in
+            let solutions = (1...count).map { i -> [Instruction] in
                 DispatchQueue.main.async { progress.wrappedValue = i }
                 return transactionSolution(deltas, exchangeData: exchangeData)
             }
@@ -152,17 +152,17 @@ struct RealExchangesInteractor: ExchangesInteractor {
         }
     }
     
-    private func transferCount(_ s: [String]) -> Int {
-        return s.filter { $0.contains("Transfer") }.count
+    private func transferCount(_ s: [Instruction]) -> Int {
+        return s.filter { $0.command == .send }.count
     }
         
     // MARK: Part 2: Liquidity Matching
     
     private func transactionSolution(_ deltas: [String : Double],
-                                     exchangeData: ExchangeData) -> [String] {
+                                     exchangeData: ExchangeData) -> [Instruction] {
         
         let balances = exchangeData.balances.grouped(by: \.ticker)
-        var sellTransactions: [String] = [], buyTransactions: [String : Double] = [:]
+        var sellTransactions: [Instruction] = [], buyTransactions: [String : Instruction] = [:]
         var buyLiq: [Set<Exchange> : [(String, Double)]] = [:]
         var postSellLiq = (balances["USD"] ?? [])
             .reduce(into: [Exchange : Double]()) { $0[$1.exchange] = $1.usdValue }
@@ -179,7 +179,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
             var d = delta, i = 0
             while d < 0, i < sellExchanges.count {
                 let (exchange, v) = sellExchanges[i], value = max(d, v)
-                sellTransactions.append("Sell \(abs(value).usdFormat) of \(ticker) on \(exchange.rawValue)")
+                sellTransactions.append(.init(command: .sell, asset: ticker, usdValue: abs(value), exchange: exchange))
                 postSellLiq[exchange] = (postSellLiq[exchange] ?? 0) + abs(value)
                 d -= value
                 i += value == v ? 1 : 0
@@ -188,28 +188,25 @@ struct RealExchangesInteractor: ExchangesInteractor {
         
         buyLiq = liquidityLoop(liq: postSellLiq, needs: buyLiq, filterKeys: true) { exchange, _, key, ticker, value in
             postSellLiq[exchange] = postSellLiq[exchange]! - value
-            let buyKey = "\(ticker.0):\(exchange.rawValue)"
-            buyTransactions[buyKey] = value + (buyTransactions[buyKey] ?? 0)
+            var instruction = Instruction(command: .buy, asset: ticker.0, usdValue: value, exchange: exchange)
+            instruction.mergeWith(buyTransactions[instruction.key])
+            buyTransactions[instruction.key] = instruction
         }.mapValues { $0.filter { v in v.1 > 0 } }.filter { !$1.isEmpty }
 
-        var exchangeTransfers: [String : Double] = [:]
+        var exchangeTransfers: [String : Instruction] = [:]
                 
         _ = liquidityLoop(liq: postSellLiq, needs: buyLiq) { exchange, exchange2, key, ticker, value in
             if exchange != exchange2 {
-                let tKey = "\(exchange.rawValue):\(exchange2.rawValue)"
-                exchangeTransfers[tKey] = (exchangeTransfers[tKey] ?? 0) + value
+                var instruction = Instruction(command: .send, usdValue: value, exchange: exchange, exchange2: exchange2)
+                instruction.mergeWith(exchangeTransfers[instruction.key])
+                exchangeTransfers[instruction.key] = instruction
             }
-            let buyKey = "\(ticker.0):\(exchange2.rawValue)"
-            buyTransactions[buyKey] = value + (buyTransactions[buyKey] ?? 0)
+            var instruction = Instruction(command: .buy, asset: ticker.0, usdValue: value, exchange: exchange2)
+            instruction.mergeWith(buyTransactions[instruction.key])
+            buyTransactions[instruction.key] = instruction
         }
         
-        return sellTransactions + exchangeTransfers.map { key, value in
-            let exchanges = key.split(separator: ":")
-            return "Transfer \(value.usdFormat) from \(exchanges[0]) to \(exchanges[1])"
-        } + buyTransactions.map { key, value in
-            let k = key.split(separator: ":")
-            return "Buy \(value.usdFormat) of \(k[0]) on \(k[1])"
-        }
+        return sellTransactions + exchangeTransfers.values + buyTransactions.values
     }
     
     private func liquidityLoop(liq: [Exchange : Double],

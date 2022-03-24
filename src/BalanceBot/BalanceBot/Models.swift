@@ -60,7 +60,6 @@ extension BalanceList {
     
 }
 
-
 enum RebalanceTrigger: Hashable {
     
     enum CalendarSchedule: String, CaseIterable {
@@ -92,6 +91,37 @@ extension RebalanceTrigger {
         switch (self, other) {
         case (.calendar, .calendar), (.threshold, .threshold): return true
         default: return false
+        }
+    }
+    
+}
+
+struct Instruction: Hashable {
+    
+    var command: Command
+    var asset: String = "USD"
+    var usdValue: Double
+    var exchange: Exchange
+    var exchange2: Exchange? = nil
+        
+}
+
+extension Instruction {
+    
+    enum Command: String {
+        case buy, sell, send
+    }
+    
+    var key: String {
+        if let e2 = exchange2 {
+            return "\(exchange.rawValue):\(e2.rawValue)"
+        }
+        return "\(asset):\(exchange.rawValue)"
+    }
+    
+    mutating func mergeWith(_ instruction: Instruction?) {
+        if let instruction = instruction {
+            usdValue += instruction.usdValue
         }
     }
     

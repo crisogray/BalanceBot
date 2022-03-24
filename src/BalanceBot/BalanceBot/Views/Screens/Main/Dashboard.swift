@@ -14,7 +14,7 @@ struct DashboardView: View {
     @State var userSettings: UserSettings
     @State var exchangeData: Loadable<ExchangeData> = .notRequested
     @State var isLoadingRebalance = false
-    @State var rebalanceTransactions: [String]? = nil
+    @State var rebalanceTransactions: [Instruction]? = nil
     @State var rebalanceTotal = 0
     @State var rebalanceProgress = 0
     @State var showRebalance = false
@@ -39,23 +39,11 @@ struct DashboardView: View {
                 isLoadingRebalance = false
                 showRebalance = newValue != nil
             })
-            .fullScreenCover(isPresented: routingBinding.apiKeys, content: { apiKeyView })
-            .fullScreenCover(isPresented: routingBinding.strategy, content: { strategyView })
+            .fullScreenCover(isPresented: routingBinding.apiKeys) { apiKeyView }
+            .fullScreenCover(isPresented: routingBinding.strategy) { strategyView }
             .fullScreenCover(isPresented: $showRebalance) {
-                if let strings = rebalanceTransactions {
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Button("Close") {
-                                showRebalance = false
-                            }
-                        }
-                        List {
-                            ForEach(strings, id: \.self) { transaction in
-                                Text(transaction).font(.headline)
-                            }
-                        }.listStyle(PlainListStyle())
-                    }
+                if let instructions = rebalanceTransactions {
+                    Rebalance(instructions: instructions, isDisplayed: $showRebalance)
                 }
             }
     }
@@ -94,7 +82,7 @@ extension DashboardView {
                 dashboardButton(image: "slider.horizontal.3",
                                 label: "Strategy",
                                 action: showStrategy)
-                    .disabled(exchangeData.value == nil)
+                    .disabled(exchangeData.value == nil || isLoadingRebalance)
                 Spacer()
                 if isLoadingRebalance {
                     buttonStack("Rebalance") {
@@ -104,12 +92,13 @@ extension DashboardView {
                     dashboardButton(image: "arrow.up.arrow.down",
                                     label: "Rebalance",
                                     action: calculateRebalance)
-                        .disabled(isLoadingRebalance)
+                        .disabled(exchangeData.value == nil || isLoadingRebalance)
                 }
                 Spacer()
                 dashboardButton(image: "key",
                                 label: "API Keys",
                                 action: showAPIKeys)
+                    .disabled(isLoadingRebalance)
                 Spacer()
             }.padding()
         }
