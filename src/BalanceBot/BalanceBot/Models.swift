@@ -107,29 +107,12 @@ struct Instruction: Hashable {
 }
 
 extension Instruction {
-    
-    enum Command: String {
-        case buy, sell, send
-    }
-    
-    var key: String {
-        if let e2 = exchange2 {
-            return "\(exchange.rawValue):\(e2.rawValue)"
-        }
-        return "\(asset):\(exchange.rawValue)"
-    }
-    
-    mutating func mergeWith(_ instruction: Instruction?) {
-        if let instruction = instruction {
-            usdValue += instruction.usdValue
-        }
-    }
-    
+    enum Command: String { case buy, sell, send }
+    var key: String { "\(exchange2?.rawValue ?? asset):\(exchange.rawValue)" }
+    mutating func mergeWith(_ i: Instruction?) { usdValue += i?.usdValue ?? 0 }
 }
 
-enum AppError: Error {
-    case noRegexMatches, invalidRequest
-}
+enum AppError: Error { case noRegexMatches, invalidRequest }
 
 extension Array where Element == Balance.ExchangeBalance {
     func convertToBalances(_ prices: [Balance.Price]) -> [Balance] {

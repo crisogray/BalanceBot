@@ -39,20 +39,18 @@ extension Rebalance {
         return HStack {
             Text("\(instruction.command.rawValue.uppercased())")
                 .frame(width: 80, alignment: .leading)
-                .font(.title.bold())//.weight(.heavy))
+                .font(.title.bold())
                 .padding(.vertical)
             Spacer()
             VStack(alignment: .leading) {
-                Text(instruction.usdValue.usdFormat)
-                    .font(.title2.bold())//.weight(.heavy))
+                Text(instruction.usdValue.usdFormat).font(.title2.bold())
                 Text(send ? "to \(instruction.exchange2!.rawValue)" : "worth of \(instruction.asset)")
                     .font(.subheadline)
-            }//.frame(width: 120)
+            }
             Spacer()
             Spacer()
-            Text(send ? "from \(instruction.exchange.rawValue)" : "on \(instruction.exchange.rawValue)")
+            Text((send ? "from " : "on ") + instruction.exchange.rawValue)
                 .frame(width: 100, alignment: .leading)
-                //.font(.headline)
         }
     }
     

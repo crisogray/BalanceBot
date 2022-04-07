@@ -54,10 +54,7 @@ extension Double {
     }
     
     var percentageFormat: String {
-        if self > 10 {
-            return String(Int(self))
-        }
-        return String(format: "%.1f", self)
+        .init(format: self > 10 ? "%.0f" : "%.1f", self)
     }
     
 }
@@ -79,9 +76,7 @@ extension Equatable {
 // MARK: String
 
 extension String {
-    var trimmed: String {
-        trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    var trimmed: String { trimmingCharacters(in: .whitespacesAndNewlines) }
 }
 
 // MARK: Array and Dictionary
@@ -101,20 +96,10 @@ extension Array where Element: Equatable {
         return filter { !values.contains($0) }
     }
     
-    mutating func addUnique(contentsOf array: [Element]) {
-        for element in array where !contains(element) {
-            append(element)
-        }
-    }
-    
 }
 
 extension Sequence where Element: Hashable {
-    
-    var unique: [Element] {
-        Array(Set(self))
-    }
-    
+    var unique: [Element] { Array(Set(self)) }
 }
 
 extension Dictionary where Value == BalanceList {

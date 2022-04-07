@@ -35,10 +35,10 @@ struct DashboardView: View {
                 exchangeData = $0
             }
             .onReceive(routingUpdate) { routingState = $0 }
-            .onChange(of: rebalanceTransactions, perform: { newValue in
+            .onChange(of: rebalanceTransactions) { newValue in
                 isLoadingRebalance = false
                 showRebalance = newValue != nil
-            })
+            }
             .fullScreenCover(isPresented: routingBinding.apiKeys) { apiKeyView }
             .fullScreenCover(isPresented: routingBinding.strategy) { strategyView }
             .fullScreenCover(isPresented: $showRebalance) {
