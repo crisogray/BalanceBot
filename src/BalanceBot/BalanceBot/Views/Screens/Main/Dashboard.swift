@@ -92,7 +92,8 @@ extension DashboardView {
                     dashboardButton(image: "arrow.up.arrow.down",
                                     label: "Rebalance",
                                     action: calculateRebalance)
-                        .disabled(exchangeData.value == nil || isLoadingRebalance)
+                        .disabled(exchangeData.value == nil || isLoadingRebalance ||
+                                  userSettings.portfolio.targetAllocation.isEmpty)
                 }
                 Spacer()
                 dashboardButton(image: "key",

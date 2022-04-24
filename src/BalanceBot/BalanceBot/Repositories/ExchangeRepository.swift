@@ -226,7 +226,6 @@ extension ActualExchangeRepository.API {
             let signature = signHMAC(message, hmac: HMAC<SHA256>.self, secret: secret)
             return ["FTX-KEY" : key, "FTX-TS" : nonce, "FTX-SIGN" : signature]
         }
-        
     }
     
     // MARK: HMAC

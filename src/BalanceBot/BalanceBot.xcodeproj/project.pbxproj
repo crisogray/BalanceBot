@@ -22,7 +22,6 @@
 		B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = B579042D27BD1FD50038AB83 /* SwiftyJSON */; };
 		B57EB71627E4C8A800582748 /* DemoExchangeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57EB71527E4C8A800582748 /* DemoExchangeRepository.swift */; };
 		B57EB71C27EC9AB100582748 /* Rebalance.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57EB71B27EC9AB100582748 /* Rebalance.swift */; };
-		B5A51D3427D8DD4D006E7DF9 /* SwiftUICharts in Frameworks */ = {isa = PBXBuildFile; productRef = B5A51D3327D8DD4D006E7DF9 /* SwiftUICharts */; };
 		B5A51D3827D8DE49006E7DF9 /* BalancesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3727D8DE49006E7DF9 /* BalancesView.swift */; };
 		B5A51D3A27D8E4E2006E7DF9 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3927D8E4E2006E7DF9 /* Helpers.swift */; };
 		B5A51D3D27D8FAD5006E7DF9 /* Strategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A51D3C27D8FAD5006E7DF9 /* Strategy.swift */; };
@@ -83,7 +82,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B579042E27BD1FD50038AB83 /* SwiftyJSON in Frameworks */,
-				B5A51D3427D8DD4D006E7DF9 /* SwiftUICharts in Frameworks */,
 				B55E857827B40CCB006D24C8 /* CodeScanner in Frameworks */,
 				B5B4ADAD27AC0BF0008921AC /* CloudKit.framework in Frameworks */,
 			);
@@ -269,7 +267,6 @@
 			packageProductDependencies = (
 				B55E857727B40CCB006D24C8 /* CodeScanner */,
 				B579042D27BD1FD50038AB83 /* SwiftyJSON */,
-				B5A51D3327D8DD4D006E7DF9 /* SwiftUICharts */,
 			);
 			productName = BalanceBot;
 			productReference = B5B4AD8F27AAE806008921AC /* BalanceBot.app */;
@@ -302,7 +299,6 @@
 			packageReferences = (
 				B55E857627B40CCB006D24C8 /* XCRemoteSwiftPackageReference "CodeScanner" */,
 				B579042C27BD1FD50038AB83 /* XCRemoteSwiftPackageReference "SwiftyJSON" */,
-				B5A51D3227D8DD4D006E7DF9 /* XCRemoteSwiftPackageReference "ChartView" */,
 			);
 			productRefGroup = B5B4AD9027AAE806008921AC /* Products */;
 			projectDirPath = "";
@@ -585,14 +581,6 @@
 				minimumVersion = 5.0.0;
 			};
 		};
-		B5A51D3227D8DD4D006E7DF9 /* XCRemoteSwiftPackageReference "ChartView" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/AppPear/ChartView";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -605,11 +593,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B579042C27BD1FD50038AB83 /* XCRemoteSwiftPackageReference "SwiftyJSON" */;
 			productName = SwiftyJSON;
-		};
-		B5A51D3327D8DD4D006E7DF9 /* SwiftUICharts */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = B5A51D3227D8DD4D006E7DF9 /* XCRemoteSwiftPackageReference "ChartView" */;
-			productName = SwiftUICharts;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

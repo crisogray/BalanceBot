@@ -45,7 +45,6 @@ struct ActualCloudKitRepository: CloudKitRepository {
     }
     
     func fetchNotifications(for portfolioId: String) -> AnyPublisher<[CKRecord], Error> {
-        print("fetch notifications")
         let query = CKQuery(recordType: "Notification", predicate: notificationPredicate(portfolioId))
         /*return Future<[CKRecord], Error> {
             try await CloudKitDatabase.pub.database(container)
@@ -85,7 +84,6 @@ struct ActualCloudKitRepository: CloudKitRepository {
     
     func deleteRecords(_ records: [CKRecord.ID], from database: CloudKitDatabase) -> AnyPublisher<[CKRecord.ID], Error> {
         resultErrorCallbackPublisher { completion in
-            print("Delete")
             let operation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: records)
             operation.modifyRecordsResultBlock = operationResultBlock(records, completion: completion)
             database.database(container).add(operation)
@@ -94,7 +92,6 @@ struct ActualCloudKitRepository: CloudKitRepository {
     
     func updateRecord(_ record: CKRecord, in database: CloudKitDatabase) -> AnyPublisher<CKRecord, Error> {
         resultErrorCallbackPublisher { completion in
-            print("Update")
             let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
             operation.savePolicy = .changedKeys
             operation.modifyRecordsResultBlock = operationResultBlock(record, completion: completion)

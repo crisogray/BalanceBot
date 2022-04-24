@@ -15,11 +15,11 @@ indirect enum JSONDecodeSchema {
     case key
 }
 
-protocol ArrayInitialisable {
+protocol ArrayInitialised {
     init?(_ values: [Any])
 }
 
-extension Balance: ArrayInitialisable {
+extension Balance: ArrayInitialised {
     
     init?(_ values: [Any]) {
         guard let ticker = values[0] as? String, let exchange = values[3] as? Exchange,
@@ -40,7 +40,7 @@ extension Balance: ArrayInitialisable {
 
 extension Balance {
     
-    struct ExchangeBalance: ArrayInitialisable, Equatable {
+    struct ExchangeBalance: ArrayInitialised, Equatable {
         var ticker: String
         var balance: Double
         var exchange: Exchange
@@ -60,7 +60,7 @@ extension Balance {
         
     }
     
-    struct Price: ArrayInitialisable, Equatable {
+    struct Price: ArrayInitialised, Equatable {
         var price: Double
         var ticker: String
         
@@ -78,7 +78,7 @@ extension Balance {
     
 }
 
-struct Ticker: ArrayInitialisable, Equatable {
+struct Ticker: ArrayInitialised, Equatable {
     
     var ticker: String
     var exchange: Exchange
@@ -135,7 +135,7 @@ extension Exchange {
 
 extension JSON {
     
-    func decode<Object: ArrayInitialisable>(to type: Object.Type,
+    func decode<Object: ArrayInitialised>(to type: Object.Type,
                                             with schema: JSONDecodeSchema) -> [Object] {
         (value(with: schema) as? [[AnyHashable]] ?? []).compactMap { Object($0) }
     }

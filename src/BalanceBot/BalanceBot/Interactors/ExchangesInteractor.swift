@@ -81,35 +81,19 @@ struct RealExchangesInteractor: ExchangesInteractor {
         let total = balances.map { $1.total(\.usdValue) }.total
         let newTotal = total + delta, equilibrium = newTotal / Double(group.count)
         let offsides = balances.filter { (delta > 0) == ($1.total(\.usdValue) < equilibrium) }
-        let target = (newTotal - (total - offsides.map { $1.total(\.usdValue) }.total)) / Double(offsides.count)
+        let offsideTotal = offsides.map { $1.total(\.usdValue) }.total
+        let target = (newTotal - (total - offsideTotal)) / Double(offsides.count)
         return offsides.mapValues { target - $0.total(\.usdValue) }
     }
-    
-    /*
-     
-     Example:
-     
-     3 assets: $1000, $4000, $5000
-     delta: -$4000
-     old total: $10000
-     new total: $6000
-     equilibrium: $2000
-     over equilibrium: [$4000, $5000]
-     over total: $9000
-     over target: (6000 - (10000 - 9000)) / 2 = 2500
-     deltas: [2500 - 4000, 2500 - 50000] = [-$1500, -$2500]
-     
-     */
     
     private func currentAllocation(_ balances: BalanceList, _ portfolio: Portfolio) -> [String : Double] {
         let total = balances.total(\.usdValue)
         var allocation: [String : Double] = balances.grouped(by: \.ticker)
             .mapValues { 100.0 * $0.total(\.usdValue) / total }
         portfolio.assetGroups
-            .filter { key, _ in portfolio.targetAllocation[key] != nil }
+            .filter { portfolio.targetAllocation[$0.0] != nil }
             .forEach { name, group in
-                allocation[name] = group
-                    .compactMap { allocation.removeValue(forKey: $0) }.total
+                allocation[name] = group.compactMap { allocation.removeValue(forKey: $0) }.total
             }
         portfolio.targetAllocation.keys
             .filter { allocation[$0] == nil }
@@ -148,9 +132,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
             let share = total * ignoredDelta / Double(100 * deltas.count)
             return $0 < 0 ? min($0 + share, 0) : max($0 - share, 0)
         }
-        
-        print(deltas)
-        
+                
         let count = deltas.count * 50 + exchangeData.balances.grouped(by: \.exchange).count * 200
         iterations.wrappedValue = count
         progress.wrappedValue = 0
