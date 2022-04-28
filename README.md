@@ -20,6 +20,5 @@ Requirements:
 	* ‘Receive Notifications’ toggle is active
 	* Portfolio is outside of threshold
 
-Open the notification NodeJS server script location `src/server/` in terminal.
-
-Run `node app.js` command in terminal
+1. Open the notification NodeJS server script location `src/server/` in terminal.
+2. Run `node app.js` command in terminal
