@@ -162,15 +162,18 @@ struct RealExchangesInteractor: ExchangesInteractor {
         let balances = exchangeData.balances.grouped(by: \.ticker)
         var sellTransactions: [Instruction] = [], buyTransactions: [String : Instruction] = [:]
         var buyLiq: [Set<Exchange> : [(String, Double)]] = [:]
+        
         var postSellLiq = (balances["USD"] ?? [])
             .reduce(into: [Exchange : Double]()) { $0[$1.exchange] = $1.usdValue }
         
+        // Gather 'shopping list' assets to purchase, i.e. with positive delta
         for (ticker, delta) in deltas.filter({ $1 > 0 }) {
             let exchanges = Set(exchangeData.tickers
                                     .compactMap { $0.ticker == ticker ? $0.exchange : nil })
             buyLiq[exchanges] = (buyLiq[exchanges] ?? []) + [(ticker, delta)]
         }
                 
+        // Realise 'potential credit' (asset holdings with negative deltas) in a random order
         for (ticker, delta) in deltas.filter({ $1 < 0 }) {
             let sellExchanges = (balances[ticker] ?? [])
                 .map { ($0.exchange, max(-$0.usdValue, delta)) }.shuffled()
@@ -184,6 +187,7 @@ struct RealExchangesInteractor: ExchangesInteractor {
             }
         }
         
+        // Use realised credit to perform buys in random order
         buyLiq = liquidityLoop(liq: postSellLiq, needs: buyLiq, filterKeys: true) { exchange, _, key, ticker, value in
             postSellLiq[exchange] = postSellLiq[exchange]! - value
             var instruction = Instruction(command: .buy, asset: ticker.0, usdValue: value, exchange: exchange)
@@ -192,7 +196,9 @@ struct RealExchangesInteractor: ExchangesInteractor {
         }.mapValues { $0.filter { v in v.1 > 0 } }.filter { !$1.isEmpty }
 
         var exchangeTransfers: [String : Instruction] = [:]
-                
+        
+        // Find any unmatched balances (as a result of asset availability) and, if necessary, fulfill via a transfer
+        // Store in transfersin buyd
         _ = liquidityLoop(liq: postSellLiq, needs: buyLiq) { exchange, exchange2, key, ticker, value in
             if exchange != exchange2 {
                 var instruction = Instruction(command: .send, usdValue: value, exchange: exchange, exchange2: exchange2)
