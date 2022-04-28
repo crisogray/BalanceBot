@@ -1,11 +1,10 @@
-# BalanceBot
-## Cross-exchange Cryptoasset Portfolio Rebalancing
+# BalanceBot - Cross-exchange Cryptoasset Portfolio Rebalancing
 ### Building the app
 Requirements:
-	* Mac computer with Xcode installed
-	* iOS device with cable to connect to Mac
-	* Apple account enrolled in Apple Developer Program
-	* Account on at least one supported exchange (Bitfinex, Kraken, Coinbase, FTX)
+* Mac computer with Xcode installed
+* iOS device with cable to connect to Mac
+* Apple account enrolled in Apple Developer Program
+* Account on at least one supported exchange (Bitfinex, Kraken, Coinbase, FTX)
 
 1. Connect iOS device to Mac via cable
 2. Sign into the developer account in Xcode
@@ -15,11 +14,11 @@ Requirements:
 
 ### Running the server script
 Requirements:
-	* NodeJS and NPM are installed
-	* App is installed on device
-		* Portfolio preferences have been inputted, rebalance trigger is threshold
-		* ‘Receive Notifications’ toggle is active
-		* Portfolio is outside of threshold
+* NodeJS and NPM are installed
+* App is installed on device
+	* Portfolio preferences have been inputted, rebalance trigger is threshold
+	* ‘Receive Notifications’ toggle is active
+	* Portfolio is outside of threshold
 
 Open the notification NodeJS server script location `src/server/` in terminal.
 
