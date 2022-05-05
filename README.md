@@ -1,24 +1,8 @@
-# BalanceBot - Cross-exchange Cryptoasset Portfolio Rebalancing
-### Building the app
-Requirements:
-* Mac computer with Xcode installed
-* iOS device with cable to connect to Mac
-* Apple account enrolled in Apple Developer Program
-* Account on at least one supported exchange (Bitfinex, Kraken, Coinbase, FTX)
+# BalanceBot
+## Cross-exchange Cryptoasset Portfolio Rebalancing
 
-1. Connect iOS device to Mac via cable
-2. Sign into the developer account in Xcode
-3. Open the `src/BalanceBot/BalanceBot.xcodeproj` Xcode project.
-4. Select the connected device as the deployment target
-5. Build and run the BalanceBot application
+### Abstract
 
-### Running the server script
-Requirements:
-* NodeJS and NPM are installed
-* App is installed on device
-	* Portfolio preferences have been inputted, rebalance trigger is threshold
-	* ‘Receive Notifications’ toggle is active
-	* Portfolio is outside of threshold
+Since its birth in 2009, the burgeoning cryptoasset sector currently boasts a total valuation of over two trillion dollars, attracting interest from a wide range of investors. Due to its youth and the nature of its assets, the volatility and resultant market risk of the sector is especially high. The age-old technique of diversification and Modern Portfolio Theory provide a technique to counter this risk. However, applying diversification to cryptoassets can be difficult given the number of crypto exchange websites an investor may choose to use. This is termed the ‘Multiple Exchange Problem’ in this report. The project produced an iOS app which allows the user to connect their exchange accounts and gathers relevant portfolio data. It also facilitates the input of the user’s portfolio preferences, specifically regarding how their portfolio should be diversified. The app uses this information run a specially-developed, randomised, population-based algorithm to determine the transactions a user should perform to rebalance their portfolio with minimum cost. The implemented algorithm successfully produces optimal solutions in a fraction of a second, although further research and development could offer increased efficiency. Overall, the project gave rise to an app that enables a casual investor to utilise diversification in a crypto portfolio spread across multiple exchanges. No current offering provides this capability free of charge or with the same level of accessibility to the lay-investor.
 
-1. Open the notification NodeJS server script location `src/server/` in terminal.
-2. Run `node app.js` command in terminal
+Full [disseration](Dissertation.pdf)
