@@ -1,5 +1,4 @@
-# BalanceBot
-## Cross-exchange Cryptoasset Portfolio Rebalancing
+## BalanceBot - Cross-exchange Cryptoasset Portfolio Rebalancing
 
 ### Abstract
 
